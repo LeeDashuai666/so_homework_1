@@ -8,3 +8,5 @@
 - 这些是既有 Clang 24/WSL2 的记录，不能当作当前 Docker/Clang 18 或另一台电脑的新测量结果，也不要将历史 profile 用于新二进制。
 
 在仓库根目录执行 `./run.sh evidence` 可重算最新正式结果，输出与随附 summary/decision 逐字节核对。重算成功只说明记录可复现；性能准入仍未通过，第四条和 BOLT 自适应集成仍未完成。
+
+`submission-check.json` 记录本次从 GitHub 全新克隆、无本地目标镜像缓存时的真实下载、校验、载入与 smoke 检查；这属于交付功能验证，不是新的性能验收。

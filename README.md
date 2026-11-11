@@ -27,6 +27,8 @@
 
 `evidence` 成功表示原始数据可以精确重算，不表示历史性能目标通过；重算会明确输出 `historical_performance_gate_passed: false`。
 
+已实测从 GitHub 全新克隆、无本地目标镜像缓存时的下载、校验、载入和 5 项 smoke 检查，记录见 [交付验证](stage_1/evidence/submission-check.json)。
+
 发布镜像复用项目中已构建并验证的固定版本 BOLT，再用本仓库源码和 Clang 18 构建负载与原型。`--source` 保留独立源码构建入口，需要联网下载 LLVM、建议至少 8 GB 内存及约 15 GB 可用磁盘，首次编译耗时较长。本次交付验证发布镜像的运行流程，未重复完成整套 LLVM 编译。
 
 ## 第一阶段内容
