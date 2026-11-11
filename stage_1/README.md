@@ -6,7 +6,9 @@
 
 在仓库根目录运行 `./run.sh`，或本目录运行 `./run.sh`。默认 smoke。依赖为 Linux x86-64、Docker、Bash、Python 3；不要求在宿主安装 LLVM、Clang、CMake、perf，也不自动执行系统安装。
 
-首次构建自动完成：
+默认从本仓库 Release 获取发布镜像，按 `image.json` 核对归档 SHA256、代码指纹、文件系统层和执行入口，载入后运行。已载入的相同代码镜像直接复用。也可将 Release 的 Docker 归档放入 `.build/stage1.docker.tar.gz` 后离线执行。发布镜像复用已验证的固定版本 BOLT，重新编译本仓库的 Clang 18 负载与控制器。
+
+需要独立源码重建时使用 `./run.sh build --source --jobs 2`，自动完成：
 
 1. 下载固定 LLVM 源码并编译原版 BOLT。
 2. 对同一提交应用 patch，增量编译修改版。
@@ -14,6 +16,8 @@
 4. 用 Clang 18 正常 O3 编译负载。构建分支内核时使用真实 BOLT candidate 转换，并核查恰好转换一组及公共回退调用点。
 
 构建需要联网，运行容器使用 `--network none`、当前用户 UID/GID，不使用 privileged、LBR 或 PMU。默认编译并发为 2，可用 `--jobs N` 改变。镜像按源码指纹复用，修改执行代码后会重新构建相关层。
+
+源码重建建议至少 8 GB 内存、约 15 GB 可用磁盘，首次耗时较长。本次打包已检查下载、固定提交和 CMake 配置，未重复完成整套 LLVM 编译；发布镜像使用此前已经构建、验证并记录哈希的相同源码工具链。
 
 如果设置了 HTTP(S)_PROXY，启动器将其作为 Docker 构建代理传递；localhost 代理在构建阶段使用 host 网络。需要其他构建网络时可设置 `BOLT_BUILD_NETWORK`。运行阶段仍然禁网。
 
@@ -24,7 +28,7 @@ APT 软件包和 Git 源码下载默认先直连，失败后使用已配置的�
 | `functional` | 原版/关闭版可执行节一致性，静态 Pass 语义与拒绝检查，17 项 ASan/UBSan 控制器检查，468 次控制器功能检查 |
 | `smoke`（默认） | functional 加 low95/uniform 的快速采样、校准与执行流程 |
 | `full` | functional 加原静态方案正式实验、运行时 52 场景 ×31 块 ABBA/BAAB 实验及 off/off 自对照 |
-| `build` | 仅构建镜像 |
+| `build` | 仅获取发布镜像；加 `--source` 才从 LLVM 源码重建 |
 | `evidence` | 无需 Docker，仅从随附压缩原始数据重算历史统计，并核对结果逐字节一致 |
 
 full 可能因真实性能/统计区间未达到门槛而失败。这是保留失败数据的预期行为，不能将 smoke 的成功替代完整验收。性能实验期间避免并行编译或运行其他基准。

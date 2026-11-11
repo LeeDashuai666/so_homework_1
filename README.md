@@ -12,12 +12,13 @@
 ./run.sh
 ```
 
-首次运行自动下载固定提交、编译原版和修改版 BOLT、构建包含工具与负载的 Docker，再执行功能检查和快速流程；需要网络、数 GB 磁盘空间，建议至少 8 GB 内存。默认 2 个编译任务，首次编译可能耗时较长，后续复用缓存。运行测试时容器禁网。
+首次运行自动从本仓库 Release 下载 Docker 镜像，核对 SHA256、文件系统层和执行入口后载入，再执行功能检查和快速流程。需要首次下载的网络和镜像存储空间，后续复用缓存；测试容器禁网。大镜像不进入 Git 历史。
 
 ```bash
 ./run.sh functional                  # 正确性、拒绝、代码一致性、安全检查
 ./run.sh full                        # 另做完整静态/运行时性能实验
-./run.sh build --jobs 2              # 仅构建镜像
+./run.sh build                       # 仅下载、校验并载入发布镜像
+./run.sh build --source --jobs 2     # 可选：从固定 LLVM 提交重新编译
 ./run.sh evidence                    # 无需 Docker，重算随附历史统计
 ./run.sh smoke --output "$PWD/results/check-01"
 ```
@@ -26,13 +27,15 @@
 
 `evidence` 成功表示原始数据可以精确重算，不表示历史性能目标通过；重算会明确输出 `historical_performance_gate_passed: false`。
 
+发布镜像复用项目中已构建并验证的固定版本 BOLT，再用本仓库源码和 Clang 18 构建负载与原型。`--source` 保留独立源码构建入口，需要联网下载 LLVM、建议至少 8 GB 内存及约 15 GB 可用磁盘，首次编译耗时较长。本次交付验证发布镜像的运行流程，未重复完成整套 LLVM 编译。
+
 ## 第一阶段内容
 
 | 内容 | 位置 |
 | --- | --- |
 | 构建与运行说明 | [stage_1/README.md](stage_1/README.md) |
 | 可应用于固定主线的代码 patch | [cmov-branchify.patch](stage_1/patches/cmov-branchify.patch) |
-| 自动构建 Docker | [Dockerfile](stage_1/Dockerfile) |
+| 源码重建 Docker（可选） | [Dockerfile](stage_1/Dockerfile) |
 | BOLT 训练、校准、测试及负载 | [app/](stage_1/app/) |
 | 最新保守准入实现 | [runtime/](stage_1/runtime/) |
 | Word 设计文档 | [design.docx](stage_1/docs/design.docx) |

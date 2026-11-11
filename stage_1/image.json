@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "llvm_commit": "3bd152ddbb6df45e0e07d6c9e9eb1573dcfd3dc6",
+  "code_fingerprint": "5ded33eff94792c0",
+  "image": "so-homework-1:stage1-5ded33eff94792c0",
+  "image_id": "sha256:73933e785fe14d3dd005a6889159a2d1794c5158720513cfa2fca1decde7b6ad",
+  "archive_sha256": "efcd9ae8748792e7ce7c5fc6d3dd4339b7e6b8391192d9f6e1853a243178d52f",
+  "archive_bytes": 268990045,
+  "download_url": "https://github.com/LeeDashuai666/so_homework_1/releases/download/stage1-20261111/so_homework_1-stage1-linux_amd64.docker.tar.gz",
+  "rootfs_layers": [
+    "sha256:bec87777bc2fb2edcdf9af11df1531469e7df911309c1413082b18fcb8610278",
+    "sha256:67657442a76a207cae4fe141d17aa55253c076a23993f445827a74c164b8073f",
+    "sha256:15ce1dcc93269d5467bbc2847525323e65ef2927a68ffabf175077456aba119b",
+    "sha256:c9e7e5268cc408fa7aef44d9d269b2bed89507049f69eec45ef05df31e7d0515",
+    "sha256:db9312a1b1ba865424799ea919c6faab4d5da646505c0d19e065e9c59922bbc8",
+    "sha256:abf492b7e387d58dc047854ba232fb35c78670d6ab1e2d54372145d7c6d4db6a",
+    "sha256:14c535bc1fec611f363f96a9dc5f0e93c7dd68d88db61ca62f10a3b5d7de6052",
+    "sha256:d5298fec18f5d4ab166c9a70398901210407f1c707aea3bb360b4346edb6813a",
+    "sha256:d4a710ed3c8aa1a04a32b3bb8ec6f485f7e5970162ac905be9ad2b5363be9eef",
+    "sha256:1cac72272705aa500a93bf53b7741bfa487bf0d8c2e99c61d64d9d9310b16700",
+    "sha256:ccf181cf343e31ab5559d0a8b9d260a91172a235d44a605ca9d5b2815641f993",
+    "sha256:ef5004087744392ebe35c85d394641101fe36412ab0c3af16b4f5104e19564e1"
+  ],
+  "entrypoint": [
+    "python3",
+    "/opt/homework/scripts/entrypoint.py"
+  ],
+  "command": [
+    "smoke",
+    "--output",
+    "/results/run"
+  ],
+  "bolt_sha256": "2592d56f2fb313bfe4613b0e24bc6bcb45f7cea8aa26c5afef4a3c6c6ca9c700",
+  "baseline_bolt_sha256": "b63bce8588597f456c925cfd0ccf5ab9d4c73447f69bebefd70b4db62f78762e",
+  "toolchain_provenance": "Previously built/verified fixed LLVM commit and submitted patch; workload/runtime rebuilt with Clang 18.",
+  "adaptive_bolt_integration_completed": false
+}

@@ -6,16 +6,18 @@ if [[ $# -gt 0 ]]; then shift; fi
 case "$hw_mode" in
   smoke|functional|full|build|evidence) ;;
   -h|--help)
-    echo 'Usage: ./run.sh [smoke|functional|full|build|evidence] [--output DIRECTORY] [--jobs N]'
+    echo 'Usage: ./run.sh [smoke|functional|full|build|evidence] [--output DIRECTORY] [--source] [--jobs N]'
     exit 0 ;;
   *) echo "Unknown mode: $hw_mode" >&2; exit 2 ;;
 esac
 hw_output="$hw_root/../results/$(date +%Y%m%d-%H%M%S)-$hw_mode"
 hw_jobs="${BOLT_BUILD_JOBS:-2}"
+hw_source=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --output) hw_output="${2:?--output requires a directory}"; shift 2 ;;
     --jobs) hw_jobs="${2:?--jobs requires a positive integer}"; shift 2 ;;
+    --source) hw_source=1; shift ;;
     *) echo "Unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -39,7 +41,11 @@ print(h.hexdigest()[:16])
 PY
 )"
 hw_image="so-homework-1:stage1-$hw_fingerprint"
-if ! docker image inspect "$hw_image" >/dev/null 2>&1; then
+if [[ "$hw_source" == 0 ]] && ! docker image inspect "$hw_image" >/dev/null 2>&1 && [[ -f "$hw_root/image.json" ]]; then
+  python3 "$hw_root/scripts/fetch_image.py" --metadata "$hw_root/image.json" \
+    --fingerprint "$hw_fingerprint" --cache "$hw_root/.build"
+fi
+if [[ "$hw_source" == 1 ]] || ! docker image inspect "$hw_image" >/dev/null 2>&1; then
   echo "Building LLVM/BOLT at 2026-11-02; first build downloads source and compiles it (jobs=$hw_jobs)."
   hw_network=()
   if [[ -n "${BOLT_BUILD_NETWORK:-}" ]]; then

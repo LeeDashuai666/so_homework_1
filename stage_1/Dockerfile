@@ -42,7 +42,7 @@ COPY --from=toolchain /out/ app/
 COPY app/ app/
 COPY runtime/ runtime/
 COPY tests/ tests/
-COPY scripts/ scripts/
+COPY scripts/analysis.py scripts/benchmark.py scripts/build_runtime.py scripts/check_identity.py scripts/entrypoint.py scripts/verify_runtime.py scripts/
 COPY BASELINE.json BASELINE.json
 COPY licenses/ licenses/
 RUN python3 app/build_workload.py --compiler clang++-18 --output app/workloads/search && \
