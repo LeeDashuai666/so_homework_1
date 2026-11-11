@@ -1,0 +1,23 @@
+{
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "flags": [
+    "-std=c++17",
+    "-O2",
+    "-g",
+    "-fsanitize=address,undefined"
+  ],
+  "result": {
+    "tests_passed": 17,
+    "performance_claimed": false
+  },
+  "source_sha256": {
+    "stage_1/experiments/cmov-conservative-v6/test_runtime.cpp": "f9aadcef068ddeb820afcaad1202cbeb5785820c5ed8c19d70a91752b0dbbad2",
+    "stage_1/experiments/cmov-conservative-v6/runtime.cpp": "7d199fa6787cfc04734684dcbe70b40b29d342f6c7da6889e09a8c41a7e88034",
+    "stage_1/experiments/cmov-conservative-v6/runtime.h": "ec6b23c6493fe4cdf74056ee06c61f4ab821b833f13dda07b4bb40d0fefbb25c",
+    "stage_1/experiments/cmov-conservative-v6/dispatch.cpp": "9420f954b80eb9fc8e886646f55f1cb3d83ee44d6f0d7f38d6442bf1c57ba2d0",
+    "stage_1/experiments/cmov-conservative-v6/admission.cpp": "9441cbb8a3ebb75dfa86086b71b866e856b860c891fe164583f197217069b2a4",
+    "stage_1/experiments/cmov-conservative-v6/plain.cpp": "138e21f921f742bf5732c96f15b1efbc96a9a493656b434402616df499413f6f"
+  },
+  "binary_sha256": "928f1ee1ffca0f36efd79c69852c39bd37cdedb3ad088fe56794f6c5eb3c377e",
+  "new_checks": "empty, 1, 4095 and 4097 query batches reject without clocks or B trials; all fallback work returns through shared dispatch"
+}

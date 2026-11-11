@@ -1,0 +1,10 @@
+{
+  "sha": "3bd152ddbb6df45e0e07d6c9e9eb1573dcfd3dc6",
+  "repository": "https://github.com/llvm/llvm-project.git",
+  "branch": "main",
+  "committerUTC": "2026-11-02T15:58:07Z",
+  "cutoff": "2026-11-02 23:59:59 Asia/Hong_Kong",
+  "cutoffUTC": "2026-11-02T15:59:59Z",
+  "selectedAt": "2026-11-06",
+  "note": "按用户要求固定为北京时间 2026 年 11 月 2 日结束前的 LLVM main 提交，与 plan 中原始基线一致。"
+}

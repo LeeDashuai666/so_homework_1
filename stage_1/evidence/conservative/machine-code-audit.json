@@ -1,0 +1,21 @@
+{
+  "run_dispatch_address": "0000000000007fb0",
+  "plain_call_sites": [
+    "7ff5: e8 66 ff ff ff               \tcallq\t0x7f60 <run_plain>"
+  ],
+  "prefix_calls_plain": false,
+  "dispatch_disassembly_sha256": "6d85120dbccbdcae4e901b176e97b577aefec83eac6d0ebd6ec132a44462b507",
+  "kernels": {
+    "lookup_cmov": {
+      "address": "0000000000008170",
+      "cmov_instructions": 2,
+      "disassembly_sha256": "231135422a7a1422a614b6fbf52ea71ff98a9bff9af701f0b64305b621726e53"
+    },
+    "lookup_branch": {
+      "address": "00000000004007ca",
+      "cmov_instructions": 0,
+      "disassembly_sha256": "2a5a4223c164314399b7f3f18a3a41705c5ed3ce58ba8a6bbca480811b28fe8a"
+    }
+  },
+  "compiled_binary_sha256": "b9cc3493f29f65c879a80d628571b1008e1ca563e8860b903e0693d6899afb17"
+}

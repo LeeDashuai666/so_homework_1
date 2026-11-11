@@ -1,0 +1,712 @@
+[
+  {
+    "family": "low95",
+    "kind": "normal",
+    "training_checksum": 15028980
+  },
+  {
+    "family": "low95",
+    "kind": "probe",
+    "training_checksum": 15028980
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      1,
+      0,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      1,
+      2,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 206
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      2,
+      0,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      2,
+      2,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 412
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      3,
+      0,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      3,
+      2,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 630
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      31,
+      0,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      31,
+      2,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 6524
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      257,
+      0,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      257,
+      2,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 56718
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      4095,
+      0,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low95",
+    "arguments": [
+      4095,
+      2,
+      95,
+      193,
+      "low"
+    ],
+    "checksum": 895146
+  },
+  {
+    "family": "high95",
+    "kind": "normal",
+    "training_checksum": 489591540
+  },
+  {
+    "family": "high95",
+    "kind": "probe",
+    "training_checksum": 489591540
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      1,
+      0,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      1,
+      2,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 7970
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      2,
+      0,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      2,
+      2,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 15940
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      3,
+      0,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      3,
+      2,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 23922
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      31,
+      0,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      31,
+      2,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 247208
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      257,
+      0,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      257,
+      2,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 2052066
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      4095,
+      0,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "high95",
+    "arguments": [
+      4095,
+      2,
+      95,
+      193,
+      "high"
+    ],
+    "checksum": 32688726
+  },
+  {
+    "family": "uniform",
+    "kind": "normal",
+    "training_checksum": 253441770
+  },
+  {
+    "family": "uniform",
+    "kind": "probe",
+    "training_checksum": 253441770
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      1,
+      0,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      1,
+      2,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 4020
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      2,
+      0,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      2,
+      2,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 8100
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      3,
+      0,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      3,
+      2,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 12142
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      31,
+      0,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      31,
+      2,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 125266
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      257,
+      0,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      257,
+      2,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 1055356
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      4095,
+      0,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "uniform",
+    "arguments": [
+      4095,
+      2,
+      0,
+      193,
+      "low"
+    ],
+    "checksum": 16648324
+  },
+  {
+    "family": "sorted",
+    "kind": "normal",
+    "training_checksum": 253441770
+  },
+  {
+    "family": "sorted",
+    "kind": "probe",
+    "training_checksum": 253441770
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      1,
+      0,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      1,
+      2,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 4020
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      2,
+      0,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      2,
+      2,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 8100
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      3,
+      0,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      3,
+      2,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 12142
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      31,
+      0,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      31,
+      2,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 125266
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      257,
+      0,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      257,
+      2,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 1055356
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      4095,
+      0,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "sorted",
+    "arguments": [
+      4095,
+      2,
+      0,
+      193,
+      "sorted"
+    ],
+    "checksum": 16648324
+  },
+  {
+    "family": "low80",
+    "kind": "normal",
+    "training_checksum": 49954590
+  },
+  {
+    "family": "low80",
+    "kind": "probe",
+    "training_checksum": 49954590
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      1,
+      0,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      1,
+      2,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 874
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      2,
+      0,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      2,
+      2,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 1698
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      3,
+      0,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      3,
+      2,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 2502
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      31,
+      0,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      31,
+      2,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 25308
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      257,
+      0,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      257,
+      2,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 216882
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      4095,
+      0,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 0
+  },
+  {
+    "family": "low80",
+    "arguments": [
+      4095,
+      2,
+      80,
+      193,
+      "low"
+    ],
+    "checksum": 3454416
+  }
+]

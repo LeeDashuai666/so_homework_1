@@ -1,0 +1,98 @@
+{
+  "started_at": "2026-11-11T15:11:08.581465+08:00",
+  "prototype_only": true,
+  "new_bolt_option_implemented": false,
+  "cpu": 2,
+  "llvm_commit": "3bd152ddbb6df45e0e07d6c9e9eb1573dcfd3dc6",
+  "bolt_sha256": "2592d56f2fb313bfe4613b0e24bc6bcb45f7cea8aa26c5afef4a3c6c6ca9c700",
+  "compiler": "Ubuntu clang version 24.0.0 (++20261105081926+7fd78b793d7d-1~exp1~20261105202115.1915)",
+  "sources": {
+    "run.py": "82a357ef0d0eb084640e64f63bfd5f2a195e56b0633e7a33eb7ea6205f75b1ea",
+    "bench.cpp": "53e707dfbd8d048f319375c6495c3d6436a0e876311f967d0d601307d624da34",
+    "runtime.cpp": "7d199fa6787cfc04734684dcbe70b40b29d342f6c7da6889e09a8c41a7e88034",
+    "runtime.h": "ec6b23c6493fe4cdf74056ee06c61f4ab821b833f13dda07b4bb40d0fefbb25c",
+    "kernel.cpp": "fd7b80b7ef321bbd01b2ca0bf6c658141192df217319a470f275ebdaacd8c479",
+    "plain.cpp": "138e21f921f742bf5732c96f15b1efbc96a9a493656b434402616df499413f6f",
+    "dispatch.cpp": "9420f954b80eb9fc8e886646f55f1cb3d83ee44d6f0d7f38d6442bf1c57ba2d0",
+    "admission.cpp": "9441cbb8a3ebb75dfa86086b71b866e856b860c891fe164583f197217069b2a4"
+  },
+  "blocks": 31,
+  "sizes": [
+    4096,
+    8192
+  ],
+  "cases": [
+    "low95",
+    "high95",
+    "low80",
+    "uniform",
+    "sorted",
+    "shift",
+    "long-recovery",
+    "fast-shift",
+    "short-uniform1",
+    "short-uniform4",
+    "short-uniform16",
+    "short-low95",
+    "short-uniform63",
+    "threshold64",
+    "threshold65",
+    "fast-shift1",
+    "low50",
+    "hot-prefix",
+    "hot-suffix",
+    "shift-high",
+    "striped",
+    "threshold511",
+    "threshold512",
+    "threshold513",
+    "early-shift",
+    "calibration-alias"
+  ],
+  "seed": 57049,
+  "selector": {
+    "minimum_known_batches": 512,
+    "required_batch_queries": 4096,
+    "shape_guard": "validate every batch before any trial",
+    "fallback": "return prefix first; one common plain call site",
+    "approval_pairs": 3,
+    "all_trial_ratios_below": 0.9,
+    "active_exit_ratio": 0.95,
+    "control_period": 16,
+    "attempts_per_call": 1,
+    "active_suspicion": "median of latest 3 B costs; suspend B and measure one current A before deciding",
+    "failed_or_confirmed_unprofitable": "permanent fallback for remainder of call",
+    "clock": "CLOCK_THREAD_CPUTIME_ID",
+    "query_values_observed": false
+  },
+  "statistics": "randomized within-process ABBA/BAAB, sum A / sum B per independent seed block; exact order-statistic median CI; simultaneous Bonferroni over all pair and null cells",
+  "acceptance": {
+    "noninferiority_speedup_lower": 0.9900990099009901,
+    "null_equivalence": [
+      0.9900990099009901,
+      1.01
+    ],
+    "positive_cases": [
+      "low95"
+    ],
+    "positive_lower": 1.02,
+    "integration_requires": "all simultaneous noninferiority AND null precision AND positive targets; source prototype still needs actual BOLT integration"
+  },
+  "timed": "complete logical calls including admission, controller construction, all work, clocks and counter aggregation; prepared inputs/reference checks/process startup/JSON excluded equally",
+  "short_repeats": {
+    "short-uniform1": 512,
+    "short-uniform4": 128,
+    "short-uniform16": 32,
+    "short-low95": 32,
+    "short-uniform63": 9,
+    "threshold64": 8,
+    "threshold65": 8,
+    "fast-shift": 2,
+    "fast-shift1": 8,
+    "threshold511": 2
+  },
+  "baseline": "same ELF; one run_dispatch and one run_plain call site for off, bypass and terminal fallback; inspect_prefix has returned before fallback; single-kernel code footprint not measured",
+  "no_new_input_universal_guarantee": true,
+  "reuse_build": "/home/lxy18/system_homework/stage_1/results/cmov-conservative-v6-build-20261111",
+  "binary_sha256": "b9cc3493f29f65c879a80d628571b1008e1ca563e8860b903e0693d6899afb17"
+}

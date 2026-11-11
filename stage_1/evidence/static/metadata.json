@@ -1,0 +1,30 @@
+{
+  "started_at": "2026-11-09T23:22:40.741299+08:00",
+  "machine": "x86_64",
+  "kernel": "6.6.87.2-microsoft-standard-WSL2",
+  "logical_cpu": 2,
+  "allowed_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "quick": false,
+  "workload_sha256": "6eb446a2411c5db8810728657986de718d29879ff7050f825902b9b42b202004",
+  "bolt_sha256": "2592d56f2fb313bfe4613b0e24bc6bcb45f7cea8aa26c5afef4a3c6c6ca9c700",
+  "timed_region": "internal steady_clock lookup loop; excludes startup, data generation and profiling",
+  "statistic": "median paired ratios, percentile bootstrap 95% interval, exploratory unadjusted",
+  "validation_rule": "independent seed/size calibration, every lower confidence bound >= 1.02",
+  "rejection_equivalence_margin": [
+    0.95,
+    1.05
+  ],
+  "input_scope": "one separately trained and validated binary per declared workload family",
+  "unseen_input_performance_guaranteed": false,
+  "cpu_model": "AMD Ryzen 7 7735H with Radeon Graphics",
+  "completed_at": "2026-11-09T23:23:10.326196+08:00"
+}

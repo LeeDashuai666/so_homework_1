@@ -1,0 +1,7 @@
+**/__pycache__/
+**/*.pyc
+/results/
+/stage_1/results/
+/stage_1/.build/
+*.docker.tar
+*.docker.tar.gz

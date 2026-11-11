@@ -1,0 +1,9 @@
+{
+  "functional_only": true,
+  "performance_acceptance_claimed": false,
+  "binary_sha256": "b9cc3493f29f65c879a80d628571b1008e1ca563e8860b903e0693d6899afb17",
+  "allowed_cpus": [
+    2
+  ],
+  "records_passed": 468
+}
