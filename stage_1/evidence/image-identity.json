@@ -1,0 +1,7 @@
+{
+  "image_generated_executable_matches_formal": true,
+  "image_generated_input_sha256": "07ecf68037730b636b7f2576987d55a18fc0150857164a7f4617114ced785e16",
+  "formal_input_sha256": "07ecf68037730b636b7f2576987d55a18fc0150857164a7f4617114ced785e16",
+  "runtime_archive_sha256": "90258cec005ce3885cfbc84f0ee742f34af40a5e89c3d33e57175665b0bc6107",
+  "scope": "executable section bytes, addresses and lengths; non-executable command-line notes can differ"
+}

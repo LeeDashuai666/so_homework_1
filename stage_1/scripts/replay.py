@@ -6,7 +6,7 @@ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--evidence',type=
 with gzip.open(a.evidence/'raw.jsonl.gz','rb') as f,(a.output/'raw.jsonl').open('wb') as t:shutil.copyfileobj(f,t)
 shutil.copy2(a.evidence/'protocol.json',a.output/'protocol.json')
 root=Path(__file__).resolve().parents[1]
-subprocess.run([sys.executable,str(root/'project/cmov_runtime/run.py'),'--build','.', '--output',str(a.output),'--analyze-only'],check=True)
+subprocess.run([sys.executable,str(root/'project/cmov_runtime/analyze_v2.py'),'--source',str(a.output),'--output',str(a.output)],check=True)
 assert (a.output/'summary.json').read_bytes()==(a.evidence/'summary.json').read_bytes(),'saved summary differs'
 assert (a.output/'decision.json').read_bytes()==(a.evidence/'decision.json').read_bytes(),'saved decision differs'
 print('Saved evidence replay matches; this is not a new host measurement.')

@@ -13,6 +13,7 @@ using Values = std::vector<std::uint64_t>;
 static std::uint64_t now_ns;
 static unsigned clock_calls, fail_clock, backwards_clock, change_at;
 static bool bad_branch;
+static unsigned original_pattern, original_calls;
 static std::vector<unsigned> visits, b_visits;
 
 namespace bolt_cmov {
@@ -25,7 +26,11 @@ bool test_clock(uint64_t &out) {
 }
 extern "C" std::uint64_t lookup_cmov(const void *,const std::uint64_t *b,const std::uint64_t *e) {
   if (b==e) return 0;
-  ++visits.at(*b); now_ns+=1000;
+  ++visits.at(*b);
+  const unsigned Call = original_calls++;
+  const bool Fast = original_pattern==1 ? (Call==3 || Call==4)
+                    : original_pattern==2 && Call>=3;
+  now_ns+=Fast ? 400 : 1000;
   return *b;
 }
 extern "C" std::uint64_t lookup_branch(const void *,const std::uint64_t *b,const std::uint64_t *e) {
@@ -35,9 +40,9 @@ extern "C" std::uint64_t lookup_branch(const void *,const std::uint64_t *b,const
   return *b;
 }
 static void require(bool ok,const char *message) { if (!ok) throw std::runtime_error(message); }
-static Counters check(unsigned n,unsigned fail=0,unsigned backwards=0,bool bad=false,unsigned change=~0u,unsigned length=RequiredQueries) {
+static Counters check(unsigned n,unsigned fail=0,unsigned backwards=0,bool bad=false,unsigned change=~0u,unsigned length=RequiredQueries,unsigned pattern=0) {
   now_ns=0; clock_calls=0; fail_clock=fail; backwards_clock=backwards;
-  bad_branch=bad; change_at=change;
+  bad_branch=bad; change_at=change; original_pattern=pattern; original_calls=0;
   visits.assign(n,0); b_visits.assign(n,0);
   const unsigned stride=length ? length : 1;
   Values v, q(std::size_t(n)*stride); std::vector<Slice> slices;
@@ -59,7 +64,7 @@ int main() {
   { auto c=check(512); require(c.entered && !c.rejection && c.trial_batches==3,"positive admission"); ++passed; }
   { auto c=check(512,0,0,true); require(!c.entered && c.rejection==2 && c.trial_batches==1 && c.fallback_batches==510,"terminal failed admission"); ++passed; }
   { auto c=check(512,0,0,false,8); require(c.entered && c.rejection==3 && c.suspicion_controls==1,"shift fallback");
-    for (unsigned i=11;i<512;++i) require(!b_visits[i],"reentered after rejection"); ++passed; }
+    for (unsigned i=12;i<512;++i) require(!b_visits[i],"reentered after rejection"); ++passed; }
   for (unsigned fail: {1u,2u,3u,4u,12u,13u,14u}) {
     auto c=check(512,fail); require(c.rejection==1,"clock failure must fall back"); ++passed;
   }
@@ -70,5 +75,15 @@ int main() {
     auto c=check(512,0,0,false,~0u,length);
     require(c.short_bypass && !c.clock_reads && !c.trial_batches,"irregular batch shape must not probe"); ++passed;
   }
+  { auto c=check(512,0,0,false,~0u,RequiredQueries,1);
+    require(c.entered && !c.rejection && c.active_batches>400,"recover after fast original timing outliers"); ++passed; }
+  { auto c=check(512,0,0,false,~0u,RequiredQueries,2);
+    require(c.entered && c.rejection==3 && c.fallback_batches>400,"permanent original speedup still causes terminal fallback");
+    for(unsigned i=25;i<512;++i)require(!b_visits[i],"branch resumed after confirmed loss"); ++passed; }
+  for (unsigned fail: {35u,36u,37u,38u,51u,52u,53u,54u}) {
+    auto c=check(512,fail,0,false,~0u,RequiredQueries,1);
+    require(c.rejection==1,"clock fault during/after robust confirmation"); ++passed;
+  }
+  { auto c=check(513);require(c.entered && !c.rejection,"odd tail batch must execute once");++passed; }
   std::cout<<"{\"tests_passed\":"<<passed<<",\"performance_claimed\":false}\n";
 }

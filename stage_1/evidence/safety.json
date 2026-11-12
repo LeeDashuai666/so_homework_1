@@ -1,0 +1,16 @@
+{
+  "tests_passed": 28,
+  "compiler": "GCC with ASan and UBSan",
+  "sources": [
+    "test_runtime.cpp",
+    "cmov.cpp",
+    "cmov_observe.cpp"
+  ],
+  "new_cases": [
+    "fast original outliers recover",
+    "permanent original speedup still exits",
+    "confirmation clock failures",
+    "odd final batch"
+  ],
+  "performance_claimed": false
+}

@@ -1,43 +1,6 @@
 {
-  "started_at": "2026-11-12T12:31:23.849826+08:00",
-  "build": "/results/run/build",
-  "build_metadata": {
-    "runtime_bolt_option_implemented": true,
-    "injected": true,
-    "runtime_archive_sha256": "2d2e0c15b8d2db30009c93268c4dd817672787b70bf1cb70665ef7b0ed5dfb42",
-    "input_sha256": "07ecf68037730b636b7f2576987d55a18fc0150857164a7f4617114ced785e16",
-    "off_sha256": "8b367d237665dec26eab955df26c847005346157e915015e7349e2f649084c93",
-    "on_sha256": "1b5a6fb136b4ef339a97ea64f96b16a372952f7b0239e4baede4ad0a1885628f",
-    "static_rejection_executable_identical": true,
-    "original_kernel_cmov": 2,
-    "branch_kernel_cmov": 0,
-    "calibration": [
-      {
-        "size": 4096,
-        "seed": 83,
-        "median_speedup": 1.3747648698483914,
-        "ci95": {
-          "low": 1.3497109693389608,
-          "high": 1.459607530456066,
-          "order_index": 2,
-          "confidence_at_least": 0.95
-        }
-      },
-      {
-        "size": 8192,
-        "seed": 1009,
-        "median_speedup": 1.5516583910149082,
-        "ci95": {
-          "low": 1.509671073520209,
-          "high": 1.721899931643135,
-          "order_index": 2,
-          "confidence_at_least": 0.95
-        }
-      }
-    ],
-    "smoke_cases": 20,
-    "scope": "explicit cooperative SysV batch ABI v1, not arbitrary ELF interfaces"
-  },
+  "blocks": 31,
+  "seed": 94049,
   "sizes": [
     4096,
     8192
@@ -70,15 +33,25 @@
     "early-shift",
     "calibration-alias"
   ],
-  "blocks": 31,
-  "seed": 73049,
-  "logical_cpu": 2,
-  "timed": "same guarded API and benchmark harness in separate final flag-off/on ELFs; full batch call including runtime overhead; input preparation/process startup/JSON excluded equally",
-  "statistics": "random ABBA/BAAB independent processes per block, off/off null; exact pointwise median 95% CI, exploratory simultaneous coverage not claimed",
-  "teacher_tolerance": "approximately one percent; report medians and uncertainty, do not rewrite historical strict gates",
-  "source_sha256": "1511b1e4a063b95404d450f1cd5c4389c8e70745869600c7bef695b6baab1dfb",
-  "warmup": "one complete same-mode call per process, excluded symmetrically",
-  "minimum_batches": 512,
-  "queries_per_batch": 4096,
-  "once_per_call_attempt": true
+  "variants": {
+    "A": "/home/lxy18/system_homework/stage_1/results/cmov-runtime-docker-final-20261112/run/build/off",
+    "B": "/home/lxy18/system_homework/stage_1/results/cmov-runtime-v2-build-20261112/stock/on",
+    "C": "/home/lxy18/system_homework/stage_1/results/cmov-runtime-v2-promoted-20261112/on",
+    "N": "/home/lxy18/system_homework/stage_1/results/cmov-runtime-docker-final-20261112/run/build/off"
+  },
+  "sha256": {
+    "A": "8b367d237665dec26eab955df26c847005346157e915015e7349e2f649084c93",
+    "B": "ce874fbbae742a4bfc73f1685bd62327ad799777b1c09001b7fd097b9d0914ac",
+    "C": "8f35ee8581acef709fdcfcde0b9abe59c444a6aedfa8549dc73135acb26d2054",
+    "N": "8b367d237665dec26eab955df26c847005346157e915015e7349e2f649084c93"
+  },
+  "comparison": "random mirrored 4-way block; A/N vanilla BOLT off, B frozen released implementation, C canonical rebuilt robust confirmation plus paired-B timing",
+  "candidate_selection": "held-out confirmation of frozen selected candidate; all 52 cells, 31 fresh seeds; compare both to off and contemporaneous old implementation",
+  "source_sha256": "3c8eddd597ef776d4b68c836fa6b219c0068b8d7be416d671b703394d43f14f9",
+  "runtime_sources": {
+    "cmov.cpp": "136f1691111d4932badaa874bc018ee419b8546b751454303c09723dfc77f052",
+    "cmov_observe.cpp": "908f7de1f3787e536680b3701a9113831481530f1ae8e772d6d0b4e7fcf6f08a",
+    "cmov.h": "e73e5d928b35d006ecc021df51faae3240fedeeae4145960c1416a4ceec8d2c1"
+  },
+  "runtime_archive_sha256": "90258cec005ce3885cfbc84f0ee742f34af40a5e89c3d33e57175665b0bc6107"
 }

@@ -1,19 +1,19 @@
 {
-  "image": "so-homework-1:runtime-44f8b9e0e99d103a",
-  "code_fingerprint": "44f8b9e0e99d103a",
-  "image_id": "sha256:4c45370aab0f67d20997c8cb351a1fac2ea2c0528dd8e627a49f6ed85fcfd738",
+  "image": "so-homework-1:runtime-b711b4c819590ce8",
+  "code_fingerprint": "b711b4c819590ce8",
+  "image_id": "sha256:6eb3628116f71b32690386874ba3c2906e9c83d7a833934a58a9518d23c33682",
   "rootfs_layers": [
     "sha256:bec87777bc2fb2edcdf9af11df1531469e7df911309c1413082b18fcb8610278",
     "sha256:67657442a76a207cae4fe141d17aa55253c076a23993f445827a74c164b8073f",
     "sha256:b780e93f4c82919ca40612b0c3c32d979db5ae336d7a169011c2e89e6c8a970c",
     "sha256:82b72068bbb95fd89adc53527173f831933fb2bad8473ff62bd71a78fcb5c534",
-    "sha256:9edd38767f957fd1072394f2d6a547031ce7774a4247d5102bb6aaeff74c6c97",
-    "sha256:a2d824f009afe4871dbbaefc347baa8c85911f9dca8c5fcbefe850fa68ca1b9a",
-    "sha256:d03587b53ff73aebe20140e6115caa96d031f157a4c0d38f1397438322406686",
-    "sha256:3417200c4568799fcc25af9fada91cd2c30cd65dfb3393242e14a62574f51a86",
-    "sha256:062937a9e9d033bc3a02e2d29553c2620a4dde51258010ba9b5515b3d91045a1",
-    "sha256:bc1aabc51bdbfe9709c34c6eb2c3a467c634f9b0c83ac570ced5956f75152c32",
-    "sha256:7d4d3ec0e65d5c6eb30a7f0462cdd987f34157803a99bdf5b32cb412a1a1fb40"
+    "sha256:fe1f3bcf66627c9d6004aef24e088513053302964388ad56185b5b49f9357438",
+    "sha256:aac205c650a4a49a39454bde1eaedef50ee9bf085daef3c325d20defe722db21",
+    "sha256:2956d58e148bcbd41b1a262c00cd858fac1a59a4996f1044e98533e1b5afc1f4",
+    "sha256:15b17c1c0ba90462988624c7f1b10d360f85d728d0d65882c1710a2cbba51a57",
+    "sha256:8659b1c989a445d814b1e00223f094ca32f72e337278256f91a7d0d86fe74928",
+    "sha256:d074c769abe480180b79a264aa7ae8c0d801efc31aaccf13267002aaa4ac32b8",
+    "sha256:49a7b039db3fc643452e06986228b5298760c52a7f899927e580ddb11d9d03a3"
   ],
   "entrypoint": [
     "python3",
@@ -24,7 +24,7 @@
     "--output",
     "/results/run"
   ],
-  "download_url": "https://github.com/LeeDashuai666/so_homework_1/releases/download/runtime-20261112/so_homework_1-runtime-linux_amd64.docker.tar.gz",
-  "archive_sha256": "98297b326da03cb42c6ab0ebfb0fb03742ed3490132e932df8ac25032074671d",
-  "archive_bytes": 268649741
+  "download_url": "https://github.com/LeeDashuai666/so_homework_1/releases/download/runtime-v2-20261112/so_homework_1-runtime-v2-linux_amd64.docker.tar.gz",
+  "archive_sha256": "3ea70ef25ec5a962ea52f8d472d8ffef4199644d7b239945bd3b0ec1c17e3398",
+  "archive_bytes": 268670652
 }

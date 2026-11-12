@@ -1,10 +1,10 @@
 {
   "runtime_bolt_option_implemented": true,
   "injected": true,
-  "runtime_archive_sha256": "2d2e0c15b8d2db30009c93268c4dd817672787b70bf1cb70665ef7b0ed5dfb42",
+  "runtime_archive_sha256": "90258cec005ce3885cfbc84f0ee742f34af40a5e89c3d33e57175665b0bc6107",
   "input_sha256": "07ecf68037730b636b7f2576987d55a18fc0150857164a7f4617114ced785e16",
   "off_sha256": "8b367d237665dec26eab955df26c847005346157e915015e7349e2f649084c93",
-  "on_sha256": "1b5a6fb136b4ef339a97ea64f96b16a372952f7b0239e4baede4ad0a1885628f",
+  "on_sha256": "8f35ee8581acef709fdcfcde0b9abe59c444a6aedfa8549dc73135acb26d2054",
   "static_rejection_executable_identical": true,
   "original_kernel_cmov": 2,
   "branch_kernel_cmov": 0,
@@ -33,5 +33,7 @@
     }
   ],
   "smoke_cases": 20,
-  "scope": "explicit cooperative SysV batch ABI v1, not arbitrary ELF interfaces"
+  "scope": "explicit cooperative SysV batch ABI v1, not arbitrary ELF interfaces",
+  "canonical_runtime_rebuilt": true,
+  "executable_identical_to_selected_candidate": true
 }

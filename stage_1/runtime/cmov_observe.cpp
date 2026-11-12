@@ -47,15 +47,17 @@ extern "C" uint64_t __bolt_cmov_observe_v1(
     *Out = C;
     return Sum;
   };
-  auto Measured = [&](Kernel K, uint64_t &Cost) {
+  auto Measured = [&](Kernel K, uint64_t &Cost, unsigned Count = 1) {
     uint64_t Start, Stop;
     if (!clock_read(Start, C))
       return false;
-    Sum += K(Context, B->begin, B->end);
-    ++B;
+    for (unsigned I=0; I<Count; ++I) {
+      Sum += K(Context, B->begin, B->end);
+      ++B;
+    }
     if (!clock_read(Stop, C) || Stop <= Start)
       return false;
-    Cost = Stop-Start;
+    Cost = (Stop-Start)/Count;
     return true;
   };
   for (unsigned Pair = 0; Pair != 3; ++Pair) {
@@ -81,10 +83,11 @@ extern "C" uint64_t __bolt_cmov_observe_v1(
       continue;
     }
     uint64_t Cost;
-    ++C.active_batches;
-    if (!Measured(Branch, Cost))
+    const unsigned Count = (End-B >= 2 && SinceControl <= 14) ? 2 : 1;
+    C.active_batches += Count;
+    if (!Measured(Branch, Cost, Count))
       return Fallback(1);
-    ++SinceControl;
+    SinceControl += Count;
     Recent[Cursor] = Cost;
     Cursor = (Cursor+1)%3;
     const uint64_t X = Recent[0], Y = Recent[1], Z = Recent[2];
@@ -96,8 +99,22 @@ extern "C" uint64_t __bolt_cmov_observe_v1(
       if (!Measured(Original, Reference))
         return Fallback(1);
       SinceControl = 0;
-      if (above_ratio(Median, Reference, 95))
-        return Fallback(3);
+      if (above_ratio(Median, Reference, 95)) {
+        // Confirm an apparent loss against three CURRENT original batches.
+        // Each batch is real ordered work; do not execute any new B here.
+        // At the end of the call there is no useful recovery window.
+        if (size_t(End-B) < 2)
+          return Fallback(3);
+        uint64_t A1, A2;
+        ++C.controls;
+        if (!Measured(Original, A1)) return Fallback(1);
+        ++C.controls;
+        if (!Measured(Original, A2)) return Fallback(1);
+        const uint64_t A0 = Reference;
+        Reference = A0 < A1 ? (A1 < A2 ? A1 : (A0 < A2 ? A2 : A0))
+                            : (A0 < A2 ? A0 : (A1 < A2 ? A2 : A1));
+        if (above_ratio(Median, Reference, 95)) return Fallback(3);
+      }
     }
   }
   *Next = B;

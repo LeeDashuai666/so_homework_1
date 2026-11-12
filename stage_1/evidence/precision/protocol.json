@@ -1,0 +1,34 @@
+{
+  "blocks": 31,
+  "seed": 95049,
+  "sizes": [
+    4096,
+    8192
+  ],
+  "cases": [
+    "low95"
+  ],
+  "variants": {
+    "A": "/home/lxy18/system_homework/stage_1/results/cmov-runtime-docker-final-20261112/run/build/off",
+    "B": "/home/lxy18/system_homework/stage_1/results/cmov-runtime-v2-build-20261112/stock/on",
+    "C": "/home/lxy18/system_homework/stage_1/results/cmov-runtime-v2-promoted-20261112/on",
+    "N": "/home/lxy18/system_homework/stage_1/results/cmov-runtime-docker-final-20261112/run/build/off"
+  },
+  "sha256": {
+    "A": "8b367d237665dec26eab955df26c847005346157e915015e7349e2f649084c93",
+    "B": "ce874fbbae742a4bfc73f1685bd62327ad799777b1c09001b7fd097b9d0914ac",
+    "C": "8f35ee8581acef709fdcfcde0b9abe59c444a6aedfa8549dc73135acb26d2054",
+    "N": "8b367d237665dec26eab955df26c847005346157e915015e7349e2f649084c93"
+  },
+  "comparison": "random mirrored 4-way block; A/N vanilla BOLT off, B frozen released implementation, C canonical rebuilt robust confirmation plus paired-B timing",
+  "candidate_selection": "held-out confirmation of frozen selected candidate; all 52 cells, 31 fresh seeds; compare both to off and contemporaneous old implementation",
+  "source_sha256": "876076fa7c5989b090e2ed04a35fe8805cebe6186a6fc7ac32e15d82197a7567",
+  "logical_calls_per_measurement": 4,
+  "supplementary_only": "positive-target precision diagnostic; does not replace original 52-cell primary experiment",
+  "runtime_sources": {
+    "cmov.cpp": "136f1691111d4932badaa874bc018ee419b8546b751454303c09723dfc77f052",
+    "cmov_observe.cpp": "908f7de1f3787e536680b3701a9113831481530f1ae8e772d6d0b4e7fcf6f08a",
+    "cmov.h": "e73e5d928b35d006ecc021df51faae3240fedeeae4145960c1416a4ceec8d2c1"
+  },
+  "runtime_archive_sha256": "90258cec005ce3885cfbc84f0ee742f34af40a5e89c3d33e57175665b0bc6107"
+}

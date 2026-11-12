@@ -21,7 +21,7 @@ def main():
  if a.mode=='smoke':argv+=['--seeds','79879']
  run('actual-elf-functional',argv)
  if a.mode!='functional' and meta['injected']:
-  argv=[py,app/'run.py','--build',out/'build','--output',out/'performance']
+  argv=[py,app/('compare.py' if a.mode=='full' else 'run.py'),'--build',out/'build','--output',out/'performance']
   if a.mode=='smoke':argv+=['--blocks','3','--cases','low95','uniform','short-uniform1']
   run('final-elf-performance',argv)
  result={'mode':a.mode,'checks':checks,'runtime_injected':meta['injected'],'adaptive_bolt_integration_completed':True,'performance_acceptance_claimed':False,'note':'Read performance/decision.json and uncertainty. Successful execution is not a universal performance guarantee.' if meta['injected'] else 'Independent calibration rejected this host; flag-on preserves original executable code. No protected speedup claimed.'}
