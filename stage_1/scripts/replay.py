@@ -1,28 +1,12 @@
 #!/usr/bin/env python3
-"""Recompute historical results without Docker; matching data is not a pass."""
-import argparse
-import gzip
-import json
+"""Recompute saved summary; never represent replay as a new measurement."""
+import argparse,gzip,shutil,subprocess,sys
 from pathlib import Path
-import shutil
-from analysis import analyze
-
-def main():
-    p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--evidence',required=True,type=Path)
-    p.add_argument('--output',required=True,type=Path)
-    args=p.parse_args(); evidence=args.evidence.resolve(); out=args.output.resolve()
-    out.mkdir(parents=True,exist_ok=False)
-    shutil.copy2(evidence/'protocol.json',out/'protocol.json')
-    (out/'raw.jsonl').write_bytes(gzip.decompress((evidence/'raw.jsonl.gz').read_bytes()))
-    analyze(out)
-    for name in ['summary.json','decision.json']:
-        if (out/name).read_bytes()!=(evidence/name).read_bytes():
-            raise RuntimeError('recomputed evidence differs: '+name)
-    decision=json.loads((out/'decision.json').read_text())
-    result={'historical_records_reproduced':True,
-            'historical_performance_gate_passed':decision['empirical_gate_passed'],
-            'adaptive_bolt_integration_completed':False}
-    (out/'replay.json').write_text(json.dumps(result,indent=2)+'\n')
-    print(json.dumps(result,indent=2))
-if __name__=='__main__':main()
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('--evidence',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();a.output.mkdir(parents=True,exist_ok=False)
+with gzip.open(a.evidence/'raw.jsonl.gz','rb') as f,(a.output/'raw.jsonl').open('wb') as t:shutil.copyfileobj(f,t)
+shutil.copy2(a.evidence/'protocol.json',a.output/'protocol.json')
+root=Path(__file__).resolve().parents[1]
+subprocess.run([sys.executable,str(root/'project/cmov_runtime/run.py'),'--build','.', '--output',str(a.output),'--analyze-only'],check=True)
+assert (a.output/'summary.json').read_bytes()==(a.evidence/'summary.json').read_bytes(),'saved summary differs'
+assert (a.output/'decision.json').read_bytes()==(a.evidence/'decision.json').read_bytes(),'saved decision differs'
+print('Saved evidence replay matches; this is not a new host measurement.')

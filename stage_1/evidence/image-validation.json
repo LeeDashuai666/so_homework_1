@@ -1,0 +1,8 @@
+{
+  "formal_image_id": "sha256:a7601dc0d36f2504b0db5a450357858a1a963fb1d5cec0a3eb0039d9c0e75445",
+  "published_image_id": "sha256:4c45370aab0f67d20997c8cb351a1fac2ea2c0528dd8e627a49f6ed85fcfd738",
+  "difference": "smoke CI text formatter and license notice; same BOLT tool, runtime, C++ workload, formal timing and JSON statistics",
+  "published_elf_identity_file": "published-elf-identity.json",
+  "onekey_passed": true,
+  "offline_replay_byte_identical": true
+}

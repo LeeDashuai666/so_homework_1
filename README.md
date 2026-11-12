@@ -1,57 +1,55 @@
-# 系统优化大作业 · 第一阶段
+# LLVM BOLT：CMOV 反向转换与运行时保护
 
-基于 **2026-11-02 LLVM main** 的 BOLT CMOV 组反向转换，以及保守运行时准入原型。
+固定 LLVM main **2026-11-02**：`3bd152ddbb6df45e0e07d6c9e9eb1573dcfd3dc6`。
 
-**这是阶段性提交，第四条“无收益负载无性能副作用”尚未全部达标。** 已实现的 BOLT 选项是 `-cmov-branchify`；运行时保护仍是合作式批次接口原型，不能当作已经集成的新 BOLT 自适应选项。
+`-cmov-branchify-runtime` 让 BOLT 保留原 CMOV 内核、生成分支副本、改写批次入口并链接保护运行库。默认关闭。输入源码只有原内核与普通驱动，运行时逻辑由 BOLT 注入。
+
+支持 **Linux x86-64 + 显式批次 ABI v1**。不自动改写任意程序接口。测试为正常 O3 编译的 `std::lower_bound` 批量查找组件，未声称完整数据库或压缩应用获得同等提升。
 
 ## 一键运行
 
-需要原生 Linux x86-64、Bash、Python 3 和可用的 Docker；WSL2 需启用 Docker 集成。在仓库根目录执行：
-
 ```bash
-./run.sh
+git clone https://github.com/LeeDashuai666/so_homework_1.git
+cd so_homework_1
+./run.sh                 # 下载校验镜像；重新训练、校准、功能检查和快速测量
+./run.sh full            # 2×26×31 正式性能矩阵
+./run.sh functional      # 仅做功能与准入检查
+./run.sh evidence        # 离线重算随附原始数据，不代表本机重测
 ```
 
-首次运行自动从本仓库 Release 下载 Docker 镜像，核对 SHA256、文件系统层和执行入口后载入，再执行功能检查和快速流程。需要首次下载的网络和镜像存储空间，后续复用缓存；测试容器禁网。大镜像不进入 Git 历史。
+需要 Bash、Python 3 和可用 Docker；WSL2 可用。首次需下载镜像。结果默认在 `results/`，可用 `--output 新目录` 指定；已有目录不会覆盖。完整矩阵需要持续运行一段时间，进度保存在输出目录的 `run/final-elf-performance.log`。复现时重新采 profile/校准，其他 CPU 不保证获得同样收益；校准未通过会保留原代码并报告未注入。
 
-```bash
-./run.sh functional                  # 正确性、拒绝、代码一致性、安全检查
-./run.sh full                        # 另做完整静态/运行时性能实验
-./run.sh build                       # 仅下载、校验并载入发布镜像
-./run.sh build --source --jobs 2     # 可选：从固定 LLVM 提交重新编译
-./run.sh evidence                    # 无需 Docker，重算随附历史统计
-./run.sh smoke --output "$PWD/results/check-01"
-```
+## 当前结果（交付镜像、本机 WSL2）
 
-结果写入 `results/` 下的新目录，已有目录不会覆盖。**smoke 成功只说明流程和功能检查通过，不代表性能验收通过。** full 中性能区间未过会返回非零状态并保留全部数据；详细结果见输出中的 `run/result.json` 和各日志。完整性能实验可能再运行数十分钟，期间请避免其他高负载任务。
+| 键表大小 / 输入 | 收益比 off/on | 中位耗时变化 | 95% 区间（收益比） |
+| --- | --- | --- | --- |
+| 4096 / low95 | 1.0787 | -7.300% | [1.0362, 1.1772] |
+| 8192 / low95 | 1.2346 | -19.001% | [1.1537, 1.2926] |
+| 4096 / high95 | 1.0162 | -1.596% | [1.0018, 1.0294] |
+| 8192 / high95 | 1.0177 | -1.737% | [0.9993, 1.0385] |
+| 4096 / uniform | 0.9989 | +0.112% | [0.9788, 1.0052] |
+| 8192 / uniform | 1.0018 | -0.184% | [0.9934, 1.0086] |
+| 4096 / shift | 1.0396 | -3.807% | [1.0301, 1.0529] |
+| 8192 / shift | 1.1535 | -13.304% | [1.0838, 1.1905] |
+| 4096 / hot-suffix | 0.9877 | +1.244% | [0.9737, 1.0072] |
 
-`evidence` 成功表示原始数据可以精确重算，不表示历史性能目标通过；重算会明确输出 `historical_performance_gate_passed: false`。
 
-已实测从 GitHub 全新克隆、无本地目标镜像缓存时的下载、校验、载入和 5 项 smoke 检查，记录见 [交付验证](stage_1/evidence/submission-check.json)。
+正式数据为 52 个负载单元、31 配对块、12896 次计时执行，均通过结果校验。另有 755 项 BOLT 回归、30 万条语义用例、17 项 ASan/UBSan 安全检查、32 项集成检查，宿主/容器分别通过 468 次功能比对。
 
-发布镜像复用项目中已构建并验证的固定版本 BOLT，再用本仓库源码和 Clang 18 构建负载与原型。`--source` 保留独立源码构建入口，需要联网下载 LLVM、建议至少 8 GB 内存及约 15 GB 可用磁盘，首次编译耗时较长。本次交付验证发布镜像的运行流程，未重复完成整套 LLVM 编译。
+中位耗时回退不超过 1% 的单元为 50/52；另外两项是 4K hot-suffix（1.244%）和 8K threshold511（1.187%），不能宣称第四条已全部满足。 运行时保护不能证明任意未来输入绝对无回退。所有成本均包含在两个独立最终 ELF 的墙钟比较中，旧原型的 1.21～1.30 倍数据不作为当前结果。
 
-## 第一阶段内容
+## 何时优化
 
-| 内容 | 位置 |
-| --- | --- |
-| 构建与运行说明 | [stage_1/README.md](stage_1/README.md) |
-| 可应用于固定主线的代码 patch | [cmov-branchify.patch](stage_1/patches/cmov-branchify.patch) |
-| 源码重建 Docker（可选） | [Dockerfile](stage_1/Dockerfile) |
-| BOLT 训练、校准、测试及负载 | [app/](stage_1/app/) |
-| 最新保守准入实现 | [runtime/](stage_1/runtime/) |
-| Word 设计文档 | [design.docx](stage_1/docs/design.docx) |
-| 在线设计说明 | [design.md](stage_1/docs/design.md) |
-| 必要的原始数据与验收结果 | [evidence/](stage_1/evidence/) |
+静态要求：合法循环内 CMOV64 寄存器组、足够谓词样本和偏置、独立校准下界至少 2% 收益、受支持的叶内核和转发 ABI。运行时要求：至少 512 批，每批 4096 查询，连续三组实际 A/B 都显示至少 10% 局部余量。失败或优势消失后，本次调用永久回到原内核。短调用不读时钟、不试探 B。
 
-仓库不包含 LLVM 整棵源码、构建缓存、工具二进制、历次试验目录或第二阶段项目；这些不影响一键源码构建。GitHub 的 **Code → Download ZIP** 可获取本阶段完整源代码包。
+## 交付内容
 
-## 当前结果与边界
+- [代码 patch](stage_1/patches/cmov-runtime.patch)：相对固定提交，可干净应用。
+- [Word 设计文档](stage_1/docs/design.docx) / [Markdown](stage_1/docs/design.md)：设计、实现、结果和局限。
+- [完整 52 项结果](stage_1/docs/results.md) / [CSV](stage_1/docs/results.csv)；`evidence/final/` 保留协议、配对数据及统计结论。
+- `Dockerfile`：可从固定源码重建；Release 镜像包含实际 llvm-bolt、运行库、负载源码和自动化测试。
+- `project/cmov_runtime/`：单内核输入、公开 ABI、构建/测量/检查脚本。
 
-历史正式运行时实验为 2 尺寸 ×26 场景 ×31 个独立输入块：12,896 次计时结果校验通过；安全检查 17 项、容器功能检查 468 次通过。low95 收益比约 **1.21～1.30**。
+可选源码重建：`./run.sh build --source --jobs 2`；建议 8GB 以上内存和约 15GB 磁盘。发布镜像已运行验证；本次未重复整套 LLVM 冷编译。AI 辅助与贡献记录见设计文档，算法基本思想不声明理论首创。
 
-最差场景中位耗时增加约 **1%**，紧贴目标；其 95% 区间约为 **0.17%～1.88%**，因此不能宣布回退上界小于 1%。均匀等静态拒绝案例的代码一致性，与运行时保护的整体性能验收，是不同证据。原静态优化在输入分布改变后仍有显著退化反例。
-
-既有证据来自 Clang 24/WSL2；新 Docker 使用 Clang 18 重新构建负载、重新采集 profile。不同机器必须以新跑出的结果为准，不能套用旧 profile 或保证相同加速比。
-
-CMOV 转分支在 LLVM X86 后端已有先例，本项目不主张理论首创。AI 参与了方案讨论、实现草稿、脚本和文档；课程提交者需独立理解、验证并说明自己的贡献。LLVM patch 和第三方代码许可见 [说明](stage_1/licenses/NOTICE.md)。
+历史第一阶段保留在 `stage1-20261111` tag；当前 main 使用本轮 BOLT 运行时集成版本。

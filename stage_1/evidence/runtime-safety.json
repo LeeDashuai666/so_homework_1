@@ -1,0 +1,5 @@
+{
+  "tests_passed": 17,
+  "source": "same cmov.cpp and cmov_observe.cpp as libbolt_rt_cmov.a, built under GCC ASan/UBSan with injectable clock",
+  "performance_claimed": false
+}

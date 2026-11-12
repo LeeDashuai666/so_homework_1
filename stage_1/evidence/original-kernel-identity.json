@@ -1,0 +1,19 @@
+{
+  "off": {
+    "address": 4197056,
+    "size": 107,
+    "bytes_sha256": "75f182673f50ef31ec6c5ca1e5a59be33e63f118b6863efd2c4ef0f939dedfe3",
+    "executable_section_bytes": 34899,
+    "file_bytes": 6307088
+  },
+  "on": {
+    "address": 4194394,
+    "size": 107,
+    "bytes_sha256": "75f182673f50ef31ec6c5ca1e5a59be33e63f118b6863efd2c4ef0f939dedfe3",
+    "executable_section_bytes": 38077,
+    "file_bytes": 6311280
+  },
+  "code_bytes_identical": true,
+  "address_identical": false,
+  "note": "Accepted optimization can change layout. The primary separate-ELF timing includes this effect; static rejection has full executable identity."
+}

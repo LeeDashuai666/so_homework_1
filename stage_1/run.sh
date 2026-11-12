@@ -24,7 +24,7 @@ done
 [[ "$hw_jobs" =~ ^[1-9][0-9]*$ ]] || { echo '--jobs must be positive' >&2; exit 2; }
 command -v python3 >/dev/null || { echo 'Python 3 is required by the launcher.' >&2; exit 2; }
 if [[ "$hw_mode" == evidence ]]; then
-  exec env PYTHONDONTWRITEBYTECODE=1 python3 "$hw_root/scripts/replay.py" --evidence "$hw_root/evidence/conservative" --output "$hw_output"
+  exec env PYTHONDONTWRITEBYTECODE=1 python3 "$hw_root/scripts/replay.py" --evidence "$hw_root/evidence/final" --output "$hw_output"
 fi
 [[ "$(uname -m)" == x86_64 ]] || { echo 'Native Linux x86-64 is required; emulated performance is not accepted.' >&2; exit 2; }
 command -v docker >/dev/null || { echo 'Install Docker Engine or enable Docker Desktop WSL integration first.' >&2; exit 2; }
@@ -34,13 +34,13 @@ from pathlib import Path
 import hashlib,sys
 p=Path(sys.argv[1]); h=hashlib.sha256()
 files=[p/'Dockerfile',p/'BASELINE.json']
-for d in ['app','runtime','scripts','patches','tests','licenses']:
+for d in ['project','runtime','scripts','patches','licenses']:
     files += [f for f in (p/d).rglob('*') if f.is_file() and '__pycache__' not in f.parts]
 for f in sorted(files): h.update(str(f.relative_to(p)).encode()); h.update(f.read_bytes())
 print(h.hexdigest()[:16])
 PY
 )"
-hw_image="so-homework-1:stage1-$hw_fingerprint"
+hw_image="so-homework-1:runtime-$hw_fingerprint"
 if [[ "$hw_source" == 0 ]] && ! docker image inspect "$hw_image" >/dev/null 2>&1 && [[ -f "$hw_root/image.json" ]]; then
   python3 "$hw_root/scripts/fetch_image.py" --metadata "$hw_root/image.json" \
     --fingerprint "$hw_fingerprint" --cache "$hw_root/.build"

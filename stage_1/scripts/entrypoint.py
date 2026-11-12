@@ -1,45 +1,29 @@
 #!/usr/bin/env python3
-"""One command for real functional checks and separate performance acceptance."""
-import argparse
-from datetime import datetime,timezone
-import json
+"""Build, calibrate and test the actual BOLT-injected runtime on this host."""
+import argparse,json,subprocess,sys
 from pathlib import Path
-import shutil
-import subprocess
-import sys
-
 ROOT=Path(__file__).resolve().parents[1]
 def main():
-    p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('mode',choices=['smoke','functional','full'],nargs='?',default='smoke')
-    p.add_argument('--output',required=True,type=Path)
-    args=p.parse_args(); out=args.output.resolve(); out.mkdir(parents=True,exist_ok=False)
-    checks=[]
-    def run(name,argv):
-        print(f'== {name} ==',flush=True)
-        with (out/(name+'.log')).open('w') as log:
-            result=subprocess.run(list(map(str,argv)),stdout=log,stderr=subprocess.STDOUT)
-        checks.append({'name':name,'exit_code':result.returncode,'log':name+'.log'})
-        print(f'{name}: '+('PASS' if not result.returncode else f'FAILED ({result.returncode})'),flush=True)
-        return result.returncode
-    py=sys.executable
-    run('default-off-identity',[py,ROOT/'scripts/check_identity.py','--output',out/'default-off-identity'])
-    run('static-functional',[py,ROOT/'app/tests.py','--output',out/'static-functional'])
-    run('controller-safety',[ROOT/'controller-tests'])
-    run('controller-functional',[py,ROOT/'scripts/verify_runtime.py','--binary',ROOT/'runtime-build/dual.bolt','--output',out/'controller-functional.json'])
-    functional_passed=all(c['exit_code']==0 for c in checks)
-    if args.mode=='smoke' and functional_passed:
-        run('static-smoke',[py,ROOT/'app/run.py','--output',out/'static-smoke','--quick','--families','low95','uniform'])
-    elif args.mode=='full' and functional_passed:
-        run('static-performance',[py,ROOT/'app/run.py','--output',out/'static-performance'])
-        run('controller-performance',[py,ROOT/'scripts/benchmark.py','--binary',ROOT/'runtime-build/dual.bolt','--output',out/'controller-performance'])
-    shutil.copy2(ROOT/'BASELINE.json',out/'BASELINE.json')
-    shutil.copy2(ROOT/'runtime-build/build.json',out/'runtime-build.json')
-    result={'mode':args.mode,'checks':checks,'functional_only_or_smoke':args.mode!='full',
-            'performance_acceptance_claimed':args.mode=='full' and all(c['exit_code']==0 for c in checks),
-            'adaptive_bolt_integration_completed':False,
-            'completed_at':datetime.now(timezone.utc).isoformat()}
-    (out/'result.json').write_text(json.dumps(result,indent=2)+'\n')
-    print(json.dumps(result,indent=2),flush=True)
-    return 0 if all(c['exit_code']==0 for c in checks) else 2
-if __name__=='__main__': raise SystemExit(main())
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('mode',choices=['smoke','functional','full'],nargs='?',default='smoke');p.add_argument('--output',type=Path,required=True);a=p.parse_args()
+ out=a.output.resolve();out.mkdir(parents=True,exist_ok=False);checks=[];py=sys.executable;app=ROOT/'project/cmov_runtime'
+ def run(name,argv):
+  print(name,flush=True)
+  with (out/(name+'.log')).open('w') as log:r=subprocess.run(list(map(str,argv)),stdout=log,stderr=subprocess.STDOUT)
+  checks.append({'name':name,'returncode':r.returncode});print(name+(': PASS' if not r.returncode else ': FAIL'),flush=True)
+  (out/'checks.json').write_text(json.dumps(checks,indent=2)+'\n')
+  if r.returncode:raise RuntimeError(str(out/(name+'.log')))
+ run('controller-safety',[ROOT/'controller-tests'])
+ run('static-semantics',[py,ROOT/'project/cmov_branchify/tests.py','--output',out/'static-tests'])
+ run('build-and-calibrate',[py,app/'build.py','--compiler','clang++-18','--output',out/'build'])
+ meta=json.loads((out/'build/build.json').read_text())
+ if meta['injected']:run('flag-rejections-code-audit',[py,app/'tests.py','--build',out/'build','--output',out/'flag-tests'])
+ argv=[py,app/'verify_runtime.py','--build',out/'build','--output',out/'functional.json']
+ if a.mode=='smoke':argv+=['--seeds','79879']
+ run('actual-elf-functional',argv)
+ if a.mode!='functional' and meta['injected']:
+  argv=[py,app/'run.py','--build',out/'build','--output',out/'performance']
+  if a.mode=='smoke':argv+=['--blocks','3','--cases','low95','uniform','short-uniform1']
+  run('final-elf-performance',argv)
+ result={'mode':a.mode,'checks':checks,'runtime_injected':meta['injected'],'adaptive_bolt_integration_completed':True,'performance_acceptance_claimed':False,'note':'Read performance/decision.json and uncertainty. Successful execution is not a universal performance guarantee.' if meta['injected'] else 'Independent calibration rejected this host; flag-on preserves original executable code. No protected speedup claimed.'}
+ (out/'result.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2),flush=True)
+if __name__=='__main__':main()

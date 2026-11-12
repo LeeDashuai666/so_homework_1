@@ -1,25 +1,19 @@
 {
-  "schema_version": 1,
-  "llvm_commit": "3bd152ddbb6df45e0e07d6c9e9eb1573dcfd3dc6",
-  "code_fingerprint": "5ded33eff94792c0",
-  "image": "so-homework-1:stage1-5ded33eff94792c0",
-  "image_id": "sha256:73933e785fe14d3dd005a6889159a2d1794c5158720513cfa2fca1decde7b6ad",
-  "archive_sha256": "efcd9ae8748792e7ce7c5fc6d3dd4339b7e6b8391192d9f6e1853a243178d52f",
-  "archive_bytes": 268990045,
-  "download_url": "https://github.com/LeeDashuai666/so_homework_1/releases/download/stage1-20261111/so_homework_1-stage1-linux_amd64.docker.tar.gz",
+  "image": "so-homework-1:runtime-44f8b9e0e99d103a",
+  "code_fingerprint": "44f8b9e0e99d103a",
+  "image_id": "sha256:4c45370aab0f67d20997c8cb351a1fac2ea2c0528dd8e627a49f6ed85fcfd738",
   "rootfs_layers": [
     "sha256:bec87777bc2fb2edcdf9af11df1531469e7df911309c1413082b18fcb8610278",
     "sha256:67657442a76a207cae4fe141d17aa55253c076a23993f445827a74c164b8073f",
-    "sha256:15ce1dcc93269d5467bbc2847525323e65ef2927a68ffabf175077456aba119b",
-    "sha256:c9e7e5268cc408fa7aef44d9d269b2bed89507049f69eec45ef05df31e7d0515",
-    "sha256:db9312a1b1ba865424799ea919c6faab4d5da646505c0d19e065e9c59922bbc8",
-    "sha256:abf492b7e387d58dc047854ba232fb35c78670d6ab1e2d54372145d7c6d4db6a",
-    "sha256:14c535bc1fec611f363f96a9dc5f0e93c7dd68d88db61ca62f10a3b5d7de6052",
-    "sha256:d5298fec18f5d4ab166c9a70398901210407f1c707aea3bb360b4346edb6813a",
-    "sha256:d4a710ed3c8aa1a04a32b3bb8ec6f485f7e5970162ac905be9ad2b5363be9eef",
-    "sha256:1cac72272705aa500a93bf53b7741bfa487bf0d8c2e99c61d64d9d9310b16700",
-    "sha256:ccf181cf343e31ab5559d0a8b9d260a91172a235d44a605ca9d5b2815641f993",
-    "sha256:ef5004087744392ebe35c85d394641101fe36412ab0c3af16b4f5104e19564e1"
+    "sha256:b780e93f4c82919ca40612b0c3c32d979db5ae336d7a169011c2e89e6c8a970c",
+    "sha256:82b72068bbb95fd89adc53527173f831933fb2bad8473ff62bd71a78fcb5c534",
+    "sha256:9edd38767f957fd1072394f2d6a547031ce7774a4247d5102bb6aaeff74c6c97",
+    "sha256:a2d824f009afe4871dbbaefc347baa8c85911f9dca8c5fcbefe850fa68ca1b9a",
+    "sha256:d03587b53ff73aebe20140e6115caa96d031f157a4c0d38f1397438322406686",
+    "sha256:3417200c4568799fcc25af9fada91cd2c30cd65dfb3393242e14a62574f51a86",
+    "sha256:062937a9e9d033bc3a02e2d29553c2620a4dde51258010ba9b5515b3d91045a1",
+    "sha256:bc1aabc51bdbfe9709c34c6eb2c3a467c634f9b0c83ac570ced5956f75152c32",
+    "sha256:7d4d3ec0e65d5c6eb30a7f0462cdd987f34157803a99bdf5b32cb412a1a1fb40"
   ],
   "entrypoint": [
     "python3",
@@ -30,8 +24,7 @@
     "--output",
     "/results/run"
   ],
-  "bolt_sha256": "2592d56f2fb313bfe4613b0e24bc6bcb45f7cea8aa26c5afef4a3c6c6ca9c700",
-  "baseline_bolt_sha256": "b63bce8588597f456c925cfd0ccf5ab9d4c73447f69bebefd70b4db62f78762e",
-  "toolchain_provenance": "Previously built/verified fixed LLVM commit and submitted patch; workload/runtime rebuilt with Clang 18.",
-  "adaptive_bolt_integration_completed": false
+  "download_url": "https://github.com/LeeDashuai666/so_homework_1/releases/download/runtime-20261112/so_homework_1-runtime-linux_amd64.docker.tar.gz",
+  "archive_sha256": "98297b326da03cb42c6ab0ebfb0fb03742ed3490132e932df8ac25032074671d",
+  "archive_bytes": 268649741
 }

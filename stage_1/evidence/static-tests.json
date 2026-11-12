@@ -1,0 +1,126 @@
+{
+  "checks": [
+    {
+      "case": "enumerate",
+      "passed": true
+    },
+    {
+      "case": "disabled-baseline",
+      "passed": true
+    },
+    {
+      "case": "missing-profile",
+      "passed": true
+    },
+    {
+      "case": "probe-without-instrument",
+      "passed": true
+    },
+    {
+      "case": "wrong-hash",
+      "passed": true
+    },
+    {
+      "case": "wrong-cpu",
+      "passed": true
+    },
+    {
+      "case": "negative-count",
+      "passed": true
+    },
+    {
+      "case": "duplicate",
+      "passed": true
+    },
+    {
+      "case": "unvalidated",
+      "passed": true
+    },
+    {
+      "case": "unbiased",
+      "passed": true
+    },
+    {
+      "case": "too-few",
+      "passed": true
+    },
+    {
+      "case": "size-mismatch",
+      "passed": true
+    },
+    {
+      "case": "empty",
+      "passed": true
+    },
+    {
+      "case": "build-semantics",
+      "passed": true
+    },
+    {
+      "case": "semantic-original",
+      "passed": true
+    },
+    {
+      "case": "semantic-instrument",
+      "passed": true
+    },
+    {
+      "case": "semantic-probe",
+      "passed": true
+    },
+    {
+      "case": "300000 semantic output/flags/dependency checks",
+      "passed": true
+    },
+    {
+      "case": "unsupported widths, memory, mixed predicates and internal/external entries rejected",
+      "passed": true
+    },
+    {
+      "case": "build-unwind",
+      "passed": true
+    },
+    {
+      "case": "unwind-original",
+      "passed": true
+    },
+    {
+      "case": "unwind-enumerate",
+      "passed": true
+    },
+    {
+      "case": "unwind-optimize",
+      "passed": true
+    },
+    {
+      "case": "unwind-on",
+      "passed": true
+    }
+  ],
+  "rejection_code_identity": [
+    {
+      "case": "unvalidated",
+      "executable_code_identical": true
+    },
+    {
+      "case": "unbiased",
+      "executable_code_identical": true
+    },
+    {
+      "case": "too-few",
+      "executable_code_identical": true
+    },
+    {
+      "case": "size-mismatch",
+      "executable_code_identical": true
+    },
+    {
+      "case": "empty",
+      "executable_code_identical": true
+    }
+  ],
+  "semantic_result": {
+    "checks": 300000,
+    "checksum": 13697023601338155374
+  }
+}

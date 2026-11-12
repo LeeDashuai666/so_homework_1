@@ -1,0 +1,43 @@
+{
+  "blocks": 9,
+  "seeds": [
+    81049,
+    81050,
+    81051,
+    81052,
+    81053,
+    81054,
+    81055,
+    81056,
+    81057
+  ],
+  "cells": [
+    [
+      4096,
+      "low95"
+    ],
+    [
+      4096,
+      "uniform"
+    ],
+    [
+      4096,
+      "shift"
+    ],
+    [
+      8192,
+      "low95"
+    ],
+    [
+      8192,
+      "uniform"
+    ],
+    [
+      8192,
+      "shift"
+    ]
+  ],
+  "binary_sha256": "1b5a6fb136b4ef339a97ea64f96b16a372952f7b0239e4baede4ad0a1885628f",
+  "source_sha256": "80be281568b6720f29abff4525d52046626c742c08e6bc530b4319cf8e183cfc",
+  "scope": "same flag-on ELF; ordinary driver vs protected entry; diagnostic attribution only, does not replace separate flag-off/on ELF experiment"
+}

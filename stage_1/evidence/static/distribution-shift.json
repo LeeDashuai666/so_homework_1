@@ -1,9 +1,0 @@
-{
-  "median_paired_speedup": 0.35204010053117224,
-  "ci95_low": 0.3307732533612207,
-  "ci95_high": 0.35725118305520287,
-  "off_median_ns": 68761493,
-  "on_median_ns": 196167049,
-  "trials": 3,
-  "interpretation": "Diagnostic only: an optimized biased-workload ELF can regress on a new uniform distribution."
-}

@@ -1,0 +1,33 @@
+{
+  "baseline": "3bd152ddbb6df45e0e07d6c9e9eb1573dcfd3dc6",
+  "patch_clean_apply_verified": true,
+  "patched_file_count": 18,
+  "source_sha256": {
+    "bolt/include/bolt/Core/BinaryBasicBlock.h": "8da798911395f886454a2828ab19e577ca5c3357649bee0e418a3b7fa392086d",
+    "bolt/include/bolt/Core/BinaryFunction.h": "fc658b0968a888e1b8644acfdcaa739ea6d0ee623121f61e69a2c5734c7a6845",
+    "bolt/include/bolt/Core/MCPlusBuilder.h": "e14b02d85625dad5f6a912c945609f6c2a12e5b1f735ba4d4b8d2f5b94675ee6",
+    "bolt/include/bolt/Utils/CommandLineOpts.h": "9fcf3526c09181d11b7c5c94e8570773769ae2d07087f85ad03e8ad0918c1b7b",
+    "bolt/lib/Core/BinaryFunction.cpp": "f2b6b9885dd483f2ffde3a0a0c7f3dccaf7cdc2a4769842b905909e3440a465d",
+    "bolt/lib/Passes/CMakeLists.txt": "1f776bf95a55811e7d043eb0dfaca84219d28e3bac53e245a66f2f98f0483e0c",
+    "bolt/lib/Rewrite/BinaryPassManager.cpp": "504dc9591bd9696796a483d0a0dd39c3a1a491451d23bf94411222d0c3af5bc6",
+    "bolt/lib/Rewrite/RewriteInstance.cpp": "0b81e70a8e16d46c1c6bbc0896ee0bdd880a85d54f3c88f09890e54a90d79262",
+    "bolt/lib/Target/X86/X86MCPlusBuilder.cpp": "4207b974d8546a72dc3bc6c591d9283d78b43269e28b27a86c075302b555e294",
+    "bolt/lib/Utils/CommandLineOpts.cpp": "155e035f9c6fce270b7d086596991f479ef5301260b1887e0bd2662cabfb21e7",
+    "bolt/runtime/CMakeLists.txt": "4a0261bb00b6328d442a582841f5ec6a517cb7ef3480566c4bdb834362d52e31",
+    "bolt/include/bolt/Passes/CMOVBranchify.h": "4502d5a209d448d7636d5e2412aa98f1853c9df137d32f4989268d6e6e014c0a",
+    "bolt/lib/Passes/CMOVBranchify.cpp": "b8cb3c20c0489c579d3e020e2cfcf670d5179b637a2f2e69693d3610367edd8a",
+    "bolt/runtime/cmov.cpp": "136f1691111d4932badaa874bc018ee419b8546b751454303c09723dfc77f052",
+    "bolt/runtime/cmov.h": "e73e5d928b35d006ecc021df51faae3240fedeeae4145960c1416a4ceec8d2c1",
+    "bolt/runtime/cmov_observe.cpp": "fffd3032c3d38a60e8ea8a8708e18ba444cddf23928538b9f258f383407a276b",
+    "bolt/test/Inputs/cmov-branchify-profile.py": "ab48211ff807231ba7a72c16a4965f7270b55c8c875ff82ea4f33fff037a5cfd",
+    "bolt/test/X86/cmov-branchify.s": "b40ef175d1130d88d2835d166a5cc8007e520304563752b30c49cbe86b9e41b0"
+  },
+  "patch_sha256": "f0b994a8ce48d8e8853006073fadf0bf49652aee0014941af2337e5ffafbe463",
+  "llvm_bolt_sha256": "a7257b94361d60773966d76b80d33dc61ca193a592d00769981fa95a2619ff17",
+  "runtime_archive_sha256": "2d2e0c15b8d2db30009c93268c4dd817672787b70bf1cb70665ef7b0ed5dfb42",
+  "rebuilt_targets": [
+    "llvm-bolt",
+    "bolt_rt"
+  ],
+  "full_cold_llvm_rebuild_repeated": false
+}

@@ -1,0 +1,42 @@
+BOLT-INFO: shared object or position-independent executable detected
+BOLT-INFO: Target architecture: x86_64
+BOLT-INFO: BOLT version: 3bd152ddbb6df45e0e07d6c9e9eb1573dcfd3dc6
+BOLT-INFO: first alloc address is 0x0
+BOLT-INFO: creating new program header table at address 0x200000, offset 0x200000
+BOLT-INFO: enabling relocation mode
+BOLT-INFO: enabling lite mode
+BOLT-INFO: pre-processing profile using branch profile reader
+BOLT-INFO: 15 out of 31 functions in the binary (48.4%) have non-empty execution profile
+BOLT-INFO: 2 functions with profile could not be optimized
+BOLT-INFO: profile for 1 objects was ignored
+BOLT-INFO: profile quality metrics for the hottest 15 functions (reporting top 5% values): function CFG discontinuity 0.00%; call graph flow conservation gap 0.00%; CFG flow conservation gap 0.00% (weighted) 0.00% (worst); exception handling usage 0.00% (of total BBEC) 0.00% (of total InvokeEC)
+BOLT-INFO: CMOV branchify: 1 candidates, 1 converted, 0 rejected by admission
+BOLT-INFO: 175 instructions were shortened
+BOLT-INFO: removed 53 empty blocks
+BOLT-INFO: Reg Reassignment Pass Stats:
+	   3 functions affected.
+	   -112 static bytes saved.
+	   8094886 dynamic bytes saved.
+BOLT-INFO: inlined 2 calls at 1 call sites in 2 iteration(s). Change in binary size: 0 bytes.
+BOLT-INFO: basic block reordering modified layout of 8 functions (53.33% of profiled, 12.70% of total)
+BOLT-INFO: 0 Functions were reordered by LoopInversionPass
+BOLT-INFO: CMOVConversion total: converted static 0/1 (0.00%) hammock(s) into CMOV sequences, with dynamic execution count 0/1697356 (0.00%), saving 0/0 (nan) mispredictions
+BOLT-INFO: Peephole: 0 double jumps patched.
+BOLT-INFO: Peephole: 0 tail call traps inserted.
+BOLT-INFO: Peephole: 0 useless conditional branches removed.
+BOLT-INFO: FOP optimized 0 redundant load(s) and 0 unused store(s)
+BOLT-INFO: Frequency of redundant loads is 0 and frequency of unused stores is 0
+BOLT-INFO: Frequency of loads changed to use a register is 0 and frequency of loads changed to use an immediate is 0
+BOLT-INFO: FOP deleted 0 load(s) (dyn count: 0) and 0 store(s)
+BOLT-INFO: FRAME ANALYSIS: 48 function(s) were not optimized.
+BOLT-INFO: FRAME ANALYSIS: 5 function(s) (26.1% dyn cov) could not have its frame indices restored.
+BOLT-INFO: Shrink wrapping moved 0 spills inserting load/stores and 0 spills inserting push/pops
+BOLT-INFO: Shrink wrapping reduced 0 store executions (0.0% total instructions executed, 0.0% store instructions)
+BOLT-INFO: Shrink wrapping failed at reducing 5 store executions (0.0% total instructions executed, 0.0% store instructions)
+BOLT-INFO: Allocation combiner: 1 empty spaces coalesced (dyn count: 1).
+BOLT-INFO: padding code to 0x600000 to accommodate hot text
+BOLT-INFO: patched build-id (flipped first and last bits)
+BOLT-INFO: setting _end to 0x600d58
+BOLT-INFO: setting __hot_start to 0x400000
+BOLT-INFO: setting __hot_end to 0x403c24
+BOLT-WARNING: debug info will be stripped from the binary. Use -update-debug-sections to keep it.

@@ -1,0 +1,12 @@
+{
+  "integrated_bolt_runtime": true,
+  "separate_flag_off_on_elfs": true,
+  "cells": 52,
+  "measured_executions": 12896,
+  "all_measured_outputs_passed": true,
+  "median_within_one_percent_reference": 50,
+  "positive_targets_with_ci_at_least_two_percent": 2,
+  "worst_median_runtime_increase_percent": 1.243761861804793,
+  "universal_future_input_bound_proven": false,
+  "teacher_reference_is_approximate_not_all_simultaneous_ci_gate": true
+}

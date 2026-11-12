@@ -22,15 +22,17 @@ RUN cmake -S /llvm/llvm -B /build -G Ninja \
     mkdir -p /out/baseline/bin /out/baseline/lib && \
     cp /build/bin/llvm-bolt /out/baseline/bin/ && \
     cp /build/lib/libbolt_rt_*.a /out/baseline/lib/
-COPY patches/cmov-branchify.patch /tmp/cmov-branchify.patch
-RUN git -C /llvm apply --check /tmp/cmov-branchify.patch && \
-    git -C /llvm apply /tmp/cmov-branchify.patch && \
+COPY patches/cmov-runtime.patch /tmp/cmov-runtime.patch
+RUN git -C /llvm apply --check /tmp/cmov-runtime.patch && \
+    git -C /llvm apply /tmp/cmov-runtime.patch && \
     cmake --build /build --target bolt --parallel ${BUILD_JOBS} && \
-    mkdir -p /out/bin /out/lib && \
-    cp /build/bin/llvm-bolt /out/bin/ && \
-    cp /build/lib/libbolt_rt_*.a /out/lib/ && \
+    mkdir -p /out/build/bin /out/build/lib && \
+    cp /build/bin/llvm-bolt /out/build/bin/ && \
+    cp /build/lib/libbolt_rt_*.a /out/build/lib/ && \
     git -C /llvm rev-parse HEAD > /out/LLVM_COMMIT && \
-    sha256sum /tmp/cmov-branchify.patch > /out/PATCH_SHA256
+    sha256sum /tmp/cmov-runtime.patch > /out/PATCH_SHA256
+
+
 
 FROM ubuntu@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852 AS runtime
 ARG APT_DOWNLOAD_MODE=auto
@@ -38,17 +40,15 @@ ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1
 COPY scripts/install_deps.sh /tmp/install_deps.sh
 RUN bash /tmp/install_deps.sh python3 clang-18 g++ binutils zlib1g libzstd1
 WORKDIR /opt/homework
-COPY --from=toolchain /out/ app/
-COPY app/ app/
+COPY --from=toolchain /out/ ./
+COPY project/ project/
 COPY runtime/ runtime/
-COPY tests/ tests/
-COPY scripts/analysis.py scripts/benchmark.py scripts/build_runtime.py scripts/check_identity.py scripts/entrypoint.py scripts/verify_runtime.py scripts/
-COPY BASELINE.json BASELINE.json
+COPY scripts/ scripts/
 COPY licenses/ licenses/
-RUN python3 app/build_workload.py --compiler clang++-18 --output app/workloads/search && \
-    python3 scripts/build_runtime.py --compiler clang++-18 --output runtime-build && \
-    g++ -std=c++17 -O2 -g -fsanitize=address,undefined -I runtime \
-      tests/test_runtime.cpp runtime/runtime.cpp runtime/plain.cpp runtime/dispatch.cpp runtime/admission.cpp \
-      -o /opt/homework/controller-tests
+COPY BASELINE.json BASELINE.json
+RUN python3 project/cmov_branchify/build_workload.py --compiler clang++-18 --output project/cmov_branchify/workloads/search && \
+    g++ -std=c++17 -O2 -g -fsanitize=address,undefined -DBOLT_CMOV_TEST_CLOCK \
+      -I project/cmov_runtime project/cmov_runtime/test_runtime.cpp runtime/cmov.cpp runtime/cmov_observe.cpp \
+      -o controller-tests
 ENTRYPOINT ["python3", "/opt/homework/scripts/entrypoint.py"]
 CMD ["smoke", "--output", "/results/run"]

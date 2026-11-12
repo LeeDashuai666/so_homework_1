@@ -1,0 +1,37 @@
+{
+  "runtime_bolt_option_implemented": true,
+  "injected": true,
+  "runtime_archive_sha256": "2d2e0c15b8d2db30009c93268c4dd817672787b70bf1cb70665ef7b0ed5dfb42",
+  "input_sha256": "07ecf68037730b636b7f2576987d55a18fc0150857164a7f4617114ced785e16",
+  "off_sha256": "8b367d237665dec26eab955df26c847005346157e915015e7349e2f649084c93",
+  "on_sha256": "1b5a6fb136b4ef339a97ea64f96b16a372952f7b0239e4baede4ad0a1885628f",
+  "static_rejection_executable_identical": true,
+  "original_kernel_cmov": 2,
+  "branch_kernel_cmov": 0,
+  "calibration": [
+    {
+      "size": 4096,
+      "seed": 83,
+      "median_speedup": 1.3747648698483914,
+      "ci95": {
+        "low": 1.3497109693389608,
+        "high": 1.459607530456066,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    {
+      "size": 8192,
+      "seed": 1009,
+      "median_speedup": 1.5516583910149082,
+      "ci95": {
+        "low": 1.509671073520209,
+        "high": 1.721899931643135,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    }
+  ],
+  "smoke_cases": 20,
+  "scope": "explicit cooperative SysV batch ABI v1, not arbitrary ELF interfaces"
+}

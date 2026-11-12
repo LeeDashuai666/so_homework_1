@@ -8,4 +8,4 @@ LLVM/BOLT 基于 LLVM Project，固定提交 `3bd152ddbb6df45e0e07d6c9e9eb1573dc
 
 固定主线 BOLT 的 CMOVConversion 处理条件分支转 CMOV；LLVM X86 后端已有相反方向的转换。本项目新增的是固定版本 BOLT 中的反向 Pass、谓词采样及准入工程，不声称发明了 CMOV 转分支理论。
 
-本仓库为课程第一阶段材料。新增脚本、负载和运行时原型的贡献与 AI 使用情况见根目录 README 和设计文档。
+新增的脚本、负载与 BOLT 运行时保护实现，以及 AI 辅助情况见 README 和设计文档。运行库源码保留 LLVM 许可头。

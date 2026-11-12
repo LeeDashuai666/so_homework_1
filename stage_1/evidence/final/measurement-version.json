@@ -1,0 +1,5 @@
+{
+  "formal_measurement_script_sha256": "1511b1e4a063b95404d450f1cd5c4389c8e70745869600c7bef695b6baab1dfb",
+  "published_script_sha256": "1dd9f527d159e5cccfb88239aa80e42c1b6b193dda589e80034f77f88d81799a",
+  "difference": "Only print high=None as unbounded for three-block smoke CI; workload, timing, protocol and JSON statistics unchanged. Formal 31-block script is saved verbatim."
+}

@@ -1,6 +1,4 @@
-results/
-.build/
-evidence/
-docs/
 **/__pycache__/
-*.pyc
+**/*.pyc
+.build/
+results/

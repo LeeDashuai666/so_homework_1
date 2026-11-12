@@ -1,0 +1,155 @@
+{
+  "checks": [
+    {
+      "name": "vanilla",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "default-off",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "default-off executable sections addresses sizes identical to vanilla",
+      "passed": true
+    },
+    {
+      "name": "empty",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "empty executable identity",
+      "passed": true
+    },
+    {
+      "name": "unvalidated",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "unvalidated executable identity",
+      "passed": true
+    },
+    {
+      "name": "insufficient-gain",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "insufficient-gain executable identity",
+      "passed": true
+    },
+    {
+      "name": "unbiased",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "unbiased executable identity",
+      "passed": true
+    },
+    {
+      "name": "too-few",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "too-few executable identity",
+      "passed": true
+    },
+    {
+      "name": "wrong-group-size",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "wrong-group-size executable identity",
+      "passed": true
+    },
+    {
+      "name": "wrong-hash",
+      "passed": true,
+      "returncode": 1
+    },
+    {
+      "name": "wrong-cpu",
+      "passed": true,
+      "returncode": 1
+    },
+    {
+      "name": "negative-count",
+      "passed": true,
+      "returncode": 1
+    },
+    {
+      "name": "duplicate",
+      "passed": true,
+      "returncode": 1
+    },
+    {
+      "name": "missing-entry",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "missing-entry executable identity",
+      "passed": true
+    },
+    {
+      "name": "missing-kernel",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "missing-kernel executable identity",
+      "passed": true
+    },
+    {
+      "name": "wrong-forward-target",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "wrong-forward-target executable identity",
+      "passed": true
+    },
+    {
+      "name": "missing-profile",
+      "passed": true,
+      "returncode": 1
+    },
+    {
+      "name": "conflict-static",
+      "passed": true,
+      "returncode": 1
+    },
+    {
+      "name": "conflict-candidate",
+      "passed": true,
+      "returncode": 1
+    },
+    {
+      "name": "conflict-instrument",
+      "passed": true,
+      "returncode": 1
+    },
+    {
+      "name": "ELF entry remains application _start",
+      "passed": true
+    },
+    {
+      "name": "exact symbol-sized CMOV counts and clone unwind FDE",
+      "passed": true
+    },
+    {
+      "name": "runtime and thunk relocations resolved",
+      "passed": true
+    }
+  ],
+  "checks_passed": 32,
+  "bolt_sha256": "a7257b94361d60773966d76b80d33dc61ca193a592d00769981fa95a2619ff17",
+  "on_sha256": "1b5a6fb136b4ef339a97ea64f96b16a372952f7b0239e4baede4ad0a1885628f",
+  "performance_claimed": false
+}

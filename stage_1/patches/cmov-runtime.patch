@@ -1,0 +1,1127 @@
+diff --git a/bolt/include/bolt/Core/BinaryBasicBlock.h b/bolt/include/bolt/Core/BinaryBasicBlock.h
+index be13914fd..3c1c0b2b6 100644
+--- a/bolt/include/bolt/Core/BinaryBasicBlock.h
++++ b/bolt/include/bolt/Core/BinaryBasicBlock.h
+@@ -813,6 +813,12 @@ public:
+     return InputRange;
+   }
+ 
++  /// Preserve original instruction coverage when a CFG pass splits a block.
++  void setInputAddressRange(uint32_t Begin, uint32_t End) {
++    assert(Begin <= End && "invalid input range");
++    InputRange = {Begin, End};
++  }
++
+   /// Gets the memory address range of this BB in the output binary.
+   std::pair<uint64_t, uint64_t> getOutputAddressRange() const {
+     return OutputAddressRange;
+diff --git a/bolt/include/bolt/Core/BinaryFunction.h b/bolt/include/bolt/Core/BinaryFunction.h
+index c41ad0602..3b99d9dd7 100644
+--- a/bolt/include/bolt/Core/BinaryFunction.h
++++ b/bolt/include/bolt/Core/BinaryFunction.h
+@@ -2493,6 +2493,14 @@ public:
+ 
+   const CFIInstrMapType &getFDEProgram() const { return FrameInstructions; }
+ 
++  /// Copy unwind programs before cloning a CFG with unchanged stack effects.
++  /// Pseudo-instruction indices and block entry states are preserved by caller.
++  void copyCFIProgramsFrom(const BinaryFunction &Source) {
++    FrameInstructions = Source.FrameInstructions;
++    CIEFrameInstructions = Source.CIEFrameInstructions;
++    FrameRestoreEquivalents = Source.FrameRestoreEquivalents;
++  }
++
+   void moveRememberRestorePair(BinaryBasicBlock *BB);
+ 
+   bool replayCFIInstrs(int32_t FromState, int32_t ToState,
+diff --git a/bolt/include/bolt/Core/MCPlusBuilder.h b/bolt/include/bolt/Core/MCPlusBuilder.h
+index a23863505..30606e5ce 100644
+--- a/bolt/include/bolt/Core/MCPlusBuilder.h
++++ b/bolt/include/bolt/Core/MCPlusBuilder.h
+@@ -1752,6 +1752,13 @@ public:
+   }
+ 
+   /// Lower a tail call instruction \p Inst if required by target.
++  /// Convert a safe register-only conditional move to an unconditional move.
++  /// Return its original condition in CC. The default rejects all targets.
++  /// A successful conversion must preserve flags and full register semantics.
++  virtual bool convertConditionalMoveToMove(MCInst &Inst, unsigned &CC) const {
++    return false;
++  }
++
+   virtual bool lowerTailCall(MCInst &Inst) {
+     llvm_unreachable("not implemented");
+     return false;
+@@ -2568,6 +2575,14 @@ public:
+     return 2;
+   }
+ 
++  /// SysV batch ABI: preserve arguments 1-4, supply original/clone kernels in
++  /// arguments 5-6, and tail-call the self-contained admission runtime.
++  virtual InstructionListType
++  createCMOVRuntimeEntry(const MCSymbol *Original, const MCSymbol *Branch,
++                         const MCSymbol *Runtime, MCContext *Ctx) {
++    llvm_unreachable("runtime CMOV batch ABI is only supported on x86-64");
++  }
++
+   // AliasMap caches a mapping of registers to the set of registers that
+   // alias (are sub or superregs of itself, including itself).
+   std::vector<BitVector> AliasMap;
+diff --git a/bolt/include/bolt/Passes/CMOVBranchify.h b/bolt/include/bolt/Passes/CMOVBranchify.h
+new file mode 100644
+index 000000000..5ded48d33
+--- /dev/null
++++ b/bolt/include/bolt/Passes/CMOVBranchify.h
+@@ -0,0 +1,28 @@
++//===- bolt/Passes/CMOVBranchify.h - Profile-informed CMOV groups -*- C++ -*-===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++
++#ifndef BOLT_PASSES_CMOVBRANCHIFY_H
++#define BOLT_PASSES_CMOVBRANCHIFY_H
++
++#include "bolt/Passes/BinaryPasses.h"
++
++namespace llvm {
++namespace bolt {
++
++/// Expose CMOV predicates for instrumentation, or convert independently
++/// validated loop sites using a binary- and host-bound predicate profile.
++class CMOVBranchify : public BinaryFunctionPass {
++public:
++  CMOVBranchify() : BinaryFunctionPass(false) {}
++  const char *getName() const override { return "profile-informed CMOV branchification"; }
++  Error runOnFunctions(BinaryContext &BC) override;
++};
++
++} // namespace bolt
++} // namespace llvm
++#endif
+diff --git a/bolt/include/bolt/Utils/CommandLineOpts.h b/bolt/include/bolt/Utils/CommandLineOpts.h
+index cb27eea95..ce078c8f2 100644
+--- a/bolt/include/bolt/Utils/CommandLineOpts.h
++++ b/bolt/include/bolt/Utils/CommandLineOpts.h
+@@ -77,6 +77,14 @@ extern llvm::cl::OptionCategory HeatmapCategory;
+ extern llvm::cl::OptionCategory BinaryAnalysisCategory;
+ 
+ extern llvm::cl::opt<unsigned> AlignText;
++extern llvm::cl::opt<bool> CMOVBranchify;
++extern llvm::cl::opt<bool> CMOVBranchifyRuntime;
++extern llvm::cl::opt<bool> CMOVBranchifyCandidate;
++extern llvm::cl::opt<bool> CMOVBranchifyProbe;
++extern llvm::cl::opt<std::string> CMOVBranchifyProfile;
++extern llvm::cl::opt<std::string> CMOVBranchifySites;
++extern llvm::cl::opt<unsigned> CMOVBranchifyMinBias;
++extern llvm::cl::opt<unsigned> CMOVBranchifyMinCount;
+ extern llvm::cl::opt<unsigned> AlignFunctions;
+ extern llvm::cl::opt<bool> AlignBlocks;
+ extern llvm::cl::opt<unsigned> AlignBlocksMinSize;
+diff --git a/bolt/lib/Core/BinaryFunction.cpp b/bolt/lib/Core/BinaryFunction.cpp
+index 2b314098c..fcfc8c308 100644
+--- a/bolt/lib/Core/BinaryFunction.cpp
++++ b/bolt/lib/Core/BinaryFunction.cpp
+@@ -1304,6 +1304,13 @@ BinaryFunction::getInstructionSequenceLength(uint64_t Offset,
+ bool BinaryFunction::keepOffsetForInstruction(const MCInst &Inst,
+                                               uint32_t Offset) {
+   MCPlusBuilder &MIB = *BC.MIB;
++  // Predicate profiles identify original instructions, including the first
++  // instruction after a CMOV group. Keep exact disassembly offsets only when
++  // this facility is requested; re-encoding cannot recover redundant prefixes.
++  if ((opts::CMOVBranchify || opts::CMOVBranchifyRuntime || opts::CMOVBranchifyCandidate ||
++       opts::CMOVBranchifyProbe || !opts::CMOVBranchifySites.empty()) &&
++      !MIB.isNoop(Inst))
++    return true;
+   if (MIB.isCall(Inst) || MIB.isBranch(Inst) || MIB.isReturn(Inst) ||
+       MIB.isPrefix(Inst) || MIB.isIndirectBranch(Inst))
+     return true;
+@@ -2567,7 +2574,9 @@ void BinaryFunction::postProcessCFG() {
+   // in the pipeline, but the IO address map that is derived from these offsets
+   // does add non-trivial overhead and can get expensive -- that's why we don't
+   // add offsets to every single instruction.
+-  if (!requiresPreciseAddressMap() && !opts::Instrument) {
++  if (!requiresPreciseAddressMap() && !opts::Instrument &&
++      !opts::CMOVBranchify && !opts::CMOVBranchifyRuntime && !opts::CMOVBranchifyCandidate &&
++      !opts::CMOVBranchifyProbe && opts::CMOVBranchifySites.empty()) {
+     for (BinaryBasicBlock &BB : blocks())
+       for (MCInst &Inst : BB)
+         BC.MIB->clearOffset(Inst);
+diff --git a/bolt/lib/Passes/CMOVBranchify.cpp b/bolt/lib/Passes/CMOVBranchify.cpp
+new file mode 100644
+index 000000000..d9c6e9fd3
+--- /dev/null
++++ b/bolt/lib/Passes/CMOVBranchify.cpp
+@@ -0,0 +1,468 @@
++//===- bolt/Passes/CMOVBranchify.cpp - Profile-informed CMOV groups --------===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++
++#include "bolt/Passes/CMOVBranchify.h"
++#include "bolt/Core/BinaryLoop.h"
++#include "bolt/RuntimeLibs/RuntimeLibrary.h"
++#include "bolt/Utils/CommandLineOpts.h"
++#include "llvm/ADT/StringExtras.h"
++#include "llvm/ADT/StringMap.h"
++#include "llvm/Support/JSON.h"
++#include "llvm/Support/MemoryBuffer.h"
++#include "llvm/Support/SHA256.h"
++#include "llvm/Support/Endian.h"
++#include "llvm/Support/raw_ostream.h"
++#include "llvm/TargetParser/Host.h"
++#include <limits>
++
++using namespace llvm;
++using namespace llvm::bolt;
++
++namespace opts {
++static cl::opt<std::string> CMOVRuntimeKernel(
++    "cmov-runtime-kernel", cl::desc("batch ABI v1 kernel symbol"),
++    cl::init("cmov_kernel_v1"), cl::cat(BoltOptCategory));
++static cl::opt<std::string> CMOVRuntimeEntry(
++    "cmov-runtime-entry", cl::desc("batch ABI v1 forwarding entry symbol"),
++    cl::init("cmov_batch_v1"), cl::cat(BoltOptCategory));
++static cl::opt<std::string> CMOVRuntimePlain(
++    "cmov-runtime-plain", cl::desc("batch ABI v1 original driver symbol"),
++    cl::init("cmov_plain_v1"), cl::cat(BoltOptCategory));
++static cl::opt<std::string> CMOVRuntimeLib(
++    "runtime-cmov-lib", cl::desc("runtime admission static library"),
++    cl::init("libbolt_rt_cmov.a"), cl::cat(BoltOptCategory));
++}
++
++namespace {
++class CMOVRuntimeLibrary final : public RuntimeLibrary {
++  BinaryFunction *Thunk;
++public:
++  explicit CMOVRuntimeLibrary(BinaryFunction *Thunk) : Thunk(Thunk) {}
++  void addRuntimeLibSections(std::vector<std::string> &) const override {}
++  void adjustCommandLineOptions(const BinaryContext &) const override {}
++  void emitBinary(BinaryContext &, MCStreamer &) override {}
++  void link(BinaryContext &BC, StringRef ToolPath, BOLTLinker &Linker,
++            BOLTLinker::SectionsMapper Mapper) override {
++    loadLibrary(getLibPath(ToolPath, opts::CMOVRuntimeLib), Linker, Mapper);
++    auto Target = Linker.lookupSymbolInfo("__bolt_cmov_adapt_v1");
++    if (!Target) {
++      BC.errs() << "BOLT-ERROR: missing CMOV admission runtime entry\n";
++      exit(1);
++    }
++    // JITLink resolves unknown externals to zero when linking the input object
++    // before runtime objects. Complete this one dedicated rel32 relocation now
++    // that both addresses exist. The stub has no padding/stack effects; never
++    // infer an offset in arbitrary application code.
++    auto Section = Thunk->getCodeSection();
++    auto *Image = Section ? reinterpret_cast<uint8_t *>(Section->getAllocAddress() +
++        Thunk->getOutputAddress() - Section->getOutputAddress()) : nullptr;
++    const int64_t Disp = int64_t(Target->Address) -
++                         int64_t(Thunk->getOutputAddress() + 5);
++    if (!Image || Thunk->getOutputSize() != 5 || Image[0] != 0xe9 ||
++        !isInt<32>(Disp)) {
++      BC.errs() << "BOLT-ERROR: CMOV runtime thunk requires a rel32 jump\n";
++      exit(1);
++    }
++    support::endian::write32le(Image + 1, uint32_t(Disp));
++    BC.outs() << "BOLT-INFO: linked CMOV admission runtime (no init/fini hooks)\n";
++  }
++};
++
++struct Predicate {
++  uint64_t True = 0;
++  uint64_t False = 0;
++  unsigned Size = 0;
++  bool Validated = false;
++  double ValidationLower = 0;
++};
++
++struct Site {
++  BinaryBasicBlock *BB;
++  unsigned Index;
++  unsigned Count;
++  unsigned CC;
++  uint32_t Offset;
++  uint32_t EndOffset;
++  unsigned LoopDepth;
++  unsigned OldBytes;
++  unsigned NewBytes;
++};
++
++std::string key(StringRef Function, uint32_t Offset) {
++  return (Function + ":" + Twine(Offset)).str();
++}
++
++Error invalid(const Twine &Message) {
++  return createFatalBOLTError(Twine("CMOV branchification: ") + Message);
++}
++
++Expected<std::string> inputHash(BinaryContext &BC) {
++  auto Buffer = MemoryBuffer::getFile(BC.getFilename());
++  if (!Buffer)
++    return invalid(Twine("cannot read input: ") + Buffer.getError().message());
++  SHA256 Hash;
++  Hash.update((*Buffer)->getBuffer());
++  return toHex(Hash.final(), /*LowerCase=*/true);
++}
++
++Expected<StringMap<Predicate>> readProfile(StringRef Path, StringRef Hash) {
++  auto Buffer = MemoryBuffer::getFile(Path);
++  if (!Buffer)
++    return invalid(Twine("cannot read profile: ") + Buffer.getError().message());
++  auto Parsed = json::parse((*Buffer)->getBuffer());
++  if (!Parsed)
++    return invalid(Twine("invalid profile JSON: ") + toString(Parsed.takeError()));
++  const json::Object *Root = Parsed->getAsObject();
++  if (!Root || Root->getInteger("schema_version") != 1 ||
++      Root->getString("binary_sha256") != Hash)
++    return invalid("profile version or input SHA256 mismatch");
++  if (Root->getString("host_cpu") != sys::getHostCPUName())
++    return invalid("profile CPU mismatch; recollect and validate on this host");
++  const json::Array *Records = Root->getArray("sites");
++  if (!Records)
++    return invalid("missing sites array");
++  StringMap<Predicate> Result;
++  for (const json::Value &Value : *Records) {
++    const json::Object *Record = Value.getAsObject();
++    if (!Record)
++      return invalid("site must be an object");
++    auto Name = Record->getString("function");
++    auto Offset = Record->getInteger("offset");
++    auto True = Record->getInteger("true_count");
++    auto False = Record->getInteger("false_count");
++    auto Size = Record->getInteger("group_size");
++    if (!Name || !Offset || *Offset < 0 ||
++        uint64_t(*Offset) > std::numeric_limits<uint32_t>::max() ||
++        !True || *True < 0 || !False || *False < 0 || !Size ||
++        *Size < 2 || *Size > 4)
++      return invalid("invalid site identity, group size, or counters");
++    Predicate P{uint64_t(*True), uint64_t(*False), unsigned(*Size),
++                Record->getBoolean("validated").value_or(false),
++                Record->getNumber("validation_speedup_lower").value_or(0)};
++    if (!Result.try_emplace(key(*Name, uint32_t(*Offset)), P).second)
++      return invalid("duplicate site");
++  }
++  return Result;
++}
++
++void branchify(BinaryFunction &BF, const Site &S, const Predicate *P) {
++  BinaryContext &BC = BF.getBinaryContext();
++  auto &MIB = *BC.MIB;
++  BinaryBasicBlock &Head = *S.BB;
++  SmallVector<BinaryBasicBlock *, 16> OldLayout(BF.getLayout().blocks());
++  const auto OldEnd = Head.getEndOffset();
++  const uint64_t OldCount = Head.getExecutionCount();
++  BinaryBasicBlock *Moves = Head.splitAt(Head.begin() + S.Index);
++  BinaryBasicBlock *Tail = Moves->splitAt(Moves->begin() + S.Count);
++  Head.setInputAddressRange(Head.getInputOffset(), S.Offset);
++  Moves->setInputAddressRange(S.Offset, S.EndOffset);
++  Tail->setInputAddressRange(S.EndOffset, OldEnd);
++
++  // splitAt propagates the exact CFI state at both boundaries. No admitted
++  // move changes SP/FP, flags, or memory, including overlapping register copies.
++  for (MCInst &Inst : *Moves) {
++    unsigned CC;
++    const bool Converted = MIB.convertConditionalMoveToMove(Inst, CC);
++    assert(Converted && CC == S.CC && "candidate changed after collection");
++    (void)Converted;
++  }
++
++  uint64_t TrueCount = 0, FalseCount = 0;
++  if (P && OldCount != BinaryBasicBlock::COUNT_NO_PROFILE) {
++    const uint64_t Total = P->True + P->False;
++    TrueCount = (static_cast<__uint128_t>(OldCount) * P->True) / Total;
++    FalseCount = OldCount - TrueCount;
++    Moves->setExecutionCount(TrueCount);
++    Tail->setExecutionCount(OldCount);
++  }
++  Head.removeAllSuccessors();
++  Head.addSuccessor(Tail, FalseCount, 0);
++  Head.addSuccessor(Moves, TrueCount, 0);
++  if (P)
++    Moves->setSuccessorBranchInfo(*Tail, TrueCount, 0);
++  MCInst Branch;
++  MIB.createCondBranch(Branch, Tail->getLabel(),
++                       MIB.getInvertedCondCode(S.CC), BC.Ctx.get());
++  MIB.setOffset(Branch, S.Offset);
++  Head.addInstruction(Branch);
++
++  SmallVector<BinaryBasicBlock *, 16> NewLayout;
++  for (BinaryBasicBlock *BB : OldLayout) {
++    NewLayout.push_back(BB);
++    if (BB == &Head) {
++      NewLayout.push_back(Moves);
++      NewLayout.push_back(Tail);
++    }
++  }
++  BF.getLayout().update(NewLayout);
++}
++
++// Only leaf CFGs with direct internal branches and no address-bearing operands
++// are cloned. Unwind programs, block entry states and every stack effect are
++// copied; this is not the inliner's CFI-dropping path.
++bool canClone(const BinaryFunction &BF) {
++  for (const BinaryBasicBlock &BB : BF) {
++    if (BB.hasLocSyms())
++      return false;
++    for (const MCInst &Inst : BB) {
++      auto &MIB = *BF.getBinaryContext().MIB;
++      if (MIB.isCall(Inst) || MIB.isIndirectBranch(Inst) ||
++          MIB.isTailCall(Inst) || MIB.getInstLabel(Inst))
++        return false;
++      for (unsigned I = 0; I != MCPlus::getNumPrimeOperands(Inst); ++I)
++        if (Inst.getOperand(I).isExpr() && !MIB.isBranch(Inst))
++          return false;
++      if (MIB.isBranch(Inst) &&
++          !BF.getBasicBlockForLabel(MIB.getTargetSymbol(Inst)))
++        return false;
++    }
++  }
++  return true;
++}
++
++BinaryFunction *cloneKernel(BinaryFunction &Source,
++                            DenseMap<const BinaryBasicBlock *, BinaryBasicBlock *> &Map) {
++  BinaryContext &BC = Source.getBinaryContext();
++  BinaryFunction *Clone = BC.createInjectedBinaryFunction("__bolt_cmov_branch_v1");
++  Clone->copyCFIProgramsFrom(Source);
++  Clone->setExecutionCount(Source.getExecutionCount());
++  if (Source.hasValidProfile())
++    Clone->markProfiled(Source.getProfileFlags());
++  for (const BinaryBasicBlock *BB : Source.getLayout().blocks()) {
++    BinaryBasicBlock *New = Clone->addBasicBlock();
++    New->setCFIState(BB->getCFIState());
++    New->setExecutionCount(BB->getExecutionCount());
++    New->setInputAddressRange(BB->getInputOffset(), BB->getEndOffset());
++    Map[BB] = New;
++  }
++  for (const BinaryBasicBlock *BB : Source.getLayout().blocks()) {
++    BinaryBasicBlock *New = Map[BB];
++    for (MCInst Inst : *BB) {
++      if (BC.MIB->isBranch(Inst)) {
++        const BinaryBasicBlock *Target =
++            Source.getBasicBlockForLabel(BC.MIB->getTargetSymbol(Inst));
++        BC.MIB->replaceBranchTarget(Inst, Map[Target]->getLabel(), BC.Ctx.get());
++      }
++      New->addInstruction(Inst);
++    }
++    auto BI = BB->branch_info_begin();
++    for (const BinaryBasicBlock *Succ : BB->successors()) {
++      New->addSuccessor(Map[Succ], BI->Count, BI->MispredictedCount);
++      ++BI;
++    }
++  }
++  return Clone;
++}
++} // namespace
++
++Error CMOVBranchify::runOnFunctions(BinaryContext &BC) {
++  if (!BC.isX86())
++    return invalid("only x86-64 is supported");
++  if (unsigned(opts::CMOVBranchify) + unsigned(opts::CMOVBranchifyRuntime) + unsigned(opts::CMOVBranchifyCandidate) +
++          unsigned(opts::CMOVBranchifyProbe) > 1)
++    return invalid("optimization and probe modes are mutually exclusive");
++  if (opts::CMOVBranchifyProbe && !opts::Instrument)
++    return invalid("probe mode requires -instrument");
++  if ((opts::CMOVBranchify || opts::CMOVBranchifyRuntime || opts::CMOVBranchifyCandidate) && opts::CMOVBranchifyProfile.empty())
++    return invalid("-cmov-branchify requires -cmov-branchify-profile");
++  if (opts::CMOVBranchifyMinBias < 50 || opts::CMOVBranchifyMinBias > 100 ||
++      !opts::CMOVBranchifyMinCount)
++    return invalid("bias must be 50..100 and minimum count must be positive");
++  auto Hash = inputHash(BC);
++  if (!Hash)
++    return Hash.takeError();
++  StringMap<Predicate> Profile;
++  if (opts::CMOVBranchify || opts::CMOVBranchifyRuntime || opts::CMOVBranchifyCandidate) {
++    auto Loaded = readProfile(opts::CMOVBranchifyProfile, *Hash);
++    if (!Loaded)
++      return Loaded.takeError();
++    Profile = std::move(*Loaded);
++  }
++  uint64_t Candidates = 0, Converted = 0, RejectedProfile = 0;
++  BinaryFunction *Kernel = nullptr, *ABIEntry = nullptr, *Plain = nullptr;
++  bool RuntimeABI = false;
++  if (opts::CMOVBranchifyRuntime) {
++    if (!BC.isELF() || !BC.HasRelocations || opts::Instrument || BC.getRuntimeLibrary())
++      return invalid("runtime mode needs ELF relocations and no instrumentation/hugify");
++    for (auto &Item : BC.getBinaryFunctions()) {
++      BinaryFunction &F = Item.second;
++      if (F.hasName("__bolt_cmov_branch_v1") || F.hasName("__bolt_cmov_adapt_v1") || F.hasName("__bolt_cmov_observe_v1") ||
++          F.hasName("__bolt_cmov_rt_thunk_v1"))
++        return invalid("input already contains reserved CMOV runtime symbols");
++      if (F.hasName(opts::CMOVRuntimeKernel)) Kernel = &F;
++      if (F.hasName(opts::CMOVRuntimeEntry)) ABIEntry = &F;
++      if (F.hasName(opts::CMOVRuntimePlain)) Plain = &F;
++    }
++    RuntimeABI = Kernel && ABIEntry && Plain && Kernel != ABIEntry && Kernel != Plain &&
++                 ABIEntry != Plain && ABIEntry->hasCFG() && ABIEntry->isSimple() &&
++                 !ABIEntry->hasEHRanges() && !ABIEntry->isMultiEntry() &&
++                 ABIEntry->size() == 1 && ABIEntry->getFDEProgram().empty();
++    unsigned Instructions = 0;
++    if (RuntimeABI)
++      for (const MCInst &Inst : ABIEntry->front()) {
++        if (BC.MIB->isPseudo(Inst)) continue;
++        ++Instructions;
++        RuntimeABI &= BC.MIB->isTailCall(Inst) &&
++                      BC.getFunctionForSymbol(BC.MIB->getTargetSymbol(Inst)) == Plain;
++      }
++    RuntimeABI &= Instructions == 1;
++    if (!RuntimeABI)
++      BC.outs() << "BOLT-INFO: CMOV runtime: unsupported or missing forwarding batch ABI; preserving code\n";
++  }
++  json::Array Manifest;
++  for (auto &Entry : BC.getBinaryFunctions()) {
++    BinaryFunction &BF = Entry.second;
++    if (opts::CMOVBranchifyRuntime && (!RuntimeABI || &BF != Kernel))
++      continue;
++    if (!shouldOptimize(BF) || !BF.hasCFG() || BF.isMultiEntry() ||
++        BF.hasJumpTables() || BF.hasEHRanges() || BF.hasSDTMarker())
++      continue;
++    BF.calculateLoopInfo();
++    SmallVector<Site, 8> Sites;
++    for (BinaryBasicBlock &BB : BF) {
++      if (BB.isLandingPad() || BB.hasLocSyms())
++        continue;
++      for (unsigned I = 0; I < BB.size();) {
++        MCInst First = BB.begin()[I];
++        unsigned CC;
++        if (BC.MIB->getInstLabel(First) ||
++            !BC.MIB->convertConditionalMoveToMove(First, CC)) {
++          ++I;
++          continue;
++        }
++        unsigned End = I, MovesBytes = 0;
++        while (End < BB.size()) {
++          MCInst Move = BB.begin()[End];
++          unsigned ThisCC;
++          if (BC.MIB->getInstLabel(Move) ||
++              !BC.MIB->convertConditionalMoveToMove(Move, ThisCC) ||
++              ThisCC != CC)
++            break;
++          MovesBytes += BC.computeInstructionSize(Move);
++          ++End;
++        }
++        const unsigned Count = End - I;
++        auto Offset = BC.MIB->getOffset(BB.begin()[I]);
++        auto EndOffset = End < BB.size()
++                             ? BC.MIB->getOffset(BB.begin()[End])
++                             : std::nullopt;
++        if (Count < 2 || Count > 4 || !Offset || !EndOffset ||
++            *EndOffset <= *Offset) {
++          I = End;
++          continue;
++        }
++        const BinaryLoop *Loop = BF.getLoopInfo().getLoopFor(&BB);
++        const unsigned Depth = Loop ? Loop->getLoopDepth() : 0;
++        Sites.push_back({&BB, I, Count, CC, *Offset, *EndOffset, Depth,
++                         *EndOffset - *Offset, MovesBytes + 2});
++        Manifest.push_back(json::Object{
++            {"function", BF.getOneName()}, {"offset", *Offset},
++            {"end_offset", *EndOffset}, {"true_offset", *Offset},
++            {"false_offset", *EndOffset}, {"group_size", Count},
++            {"condition", CC}, {"loop_depth", Depth},
++            {"old_bytes", *EndOffset - *Offset}, {"estimated_bytes", MovesBytes + 2}});
++        ++Candidates;
++        I = End;
++      }
++    }
++    bool Changed = false;
++    if (opts::CMOVBranchifyRuntime) {
++      const Site *S = Sites.size() == 1 ? &Sites.front() : nullptr;
++      auto Found = S ? Profile.find(key(BF.getOneName(), S->Offset)) : Profile.end();
++      const Predicate *P = Found == Profile.end() ? nullptr : &Found->second;
++      const uint64_t Total = P ? P->True + P->False : 0;
++      if (!S || !P || P->Size != S->Count || !S->LoopDepth ||
++          S->NewBytes > S->OldBytes || Total < opts::CMOVBranchifyMinCount ||
++          static_cast<__uint128_t>(std::max(P->True, P->False))*100 <
++              static_cast<__uint128_t>(Total)*opts::CMOVBranchifyMinBias ||
++          !P->Validated || P->ValidationLower < 1.02 || !canClone(BF)) {
++        ++RejectedProfile;
++        continue;
++      }
++      DenseMap<const BinaryBasicBlock *, BinaryBasicBlock *> Map;
++      BinaryFunction *Clone = cloneKernel(BF, Map);
++      Site Copy = *S;
++      Copy.BB = Map[S->BB];
++      branchify(*Clone, Copy, P);
++      Clone->constructDomTree();
++      Clone->calculateLoopInfo();
++      assert(Clone->validateCFG() && "invalid cloned CMOV CFG");
++      BinaryFunction *Thunk = BC.createInjectedBinaryFunction("__bolt_cmov_rt_thunk_v1");
++      MCInst RuntimeJump;
++      BC.MIB->createTailCall(RuntimeJump,
++          BC.Ctx->getOrCreateSymbol("__bolt_cmov_adapt_v1"), BC.Ctx.get());
++      Thunk->addBasicBlock()->addInstruction(RuntimeJump);
++      // Keep the input's forwarding entry symbol; replace only its proven
++      // stack-neutral tail-jump body. Its callers and function pointers agree.
++      BinaryBasicBlock &Head = ABIEntry->front();
++      Head.clear();
++      Head.removeAllSuccessors();
++      Head.addInstructions(BC.MIB->createCMOVRuntimeEntry(
++          Kernel->getSymbol(), Clone->getSymbol(),
++          Thunk->getSymbol(), BC.Ctx.get()));
++      BC.setRuntimeLibrary(std::make_unique<CMOVRuntimeLibrary>(Thunk));
++      ++Converted;
++      BC.outs() << "BOLT-INFO: CMOV runtime: retained original kernel, cloned branch kernel, rewrote batch ABI entry\n";
++      continue;
++    }
++    // Later sites are split first so earlier instruction indices stay valid.
++    for (const Site &S : llvm::reverse(Sites)) {
++      const Predicate *P = nullptr;
++      if (opts::CMOVBranchify || opts::CMOVBranchifyCandidate) {
++        auto Found = Profile.find(key(BF.getOneName(), S.Offset));
++        if (Found != Profile.end())
++          P = &Found->second;
++        const uint64_t Total = P ? P->True + P->False : 0;
++        if (!P || P->Size != S.Count || !S.LoopDepth ||
++            S.NewBytes > S.OldBytes || Total < opts::CMOVBranchifyMinCount ||
++            static_cast<__uint128_t>(std::max(P->True, P->False)) * 100 <
++                static_cast<__uint128_t>(Total) * opts::CMOVBranchifyMinBias ||
++            (opts::CMOVBranchify && (!P->Validated || P->ValidationLower < 1.02))) {
++          ++RejectedProfile;
++          continue;
++        }
++      } else if (!opts::CMOVBranchifyProbe) {
++        continue;
++      }
++      branchify(BF, S, P);
++      ++Converted;
++      Changed = true;
++    }
++    if (Changed) {
++      BF.constructDomTree();
++      BF.calculateLoopInfo();
++      assert(BF.validateCFG() && "invalid CFG after CMOV branchification");
++    }
++  }
++  // Restore the normal postProcessCFG cleanup before later passes. Retaining
++  // temporary offsets on NOPs would prevent RemoveNops from deleting them,
++  // changing code/layout even when every candidate was rejected.
++  if (!opts::Instrument)
++    for (BinaryFunction *Function : BC.getAllBinaryFunctions()) {
++      BinaryFunction &BF = *Function;
++      if (BF.hasCFG() && !BF.requiresPreciseAddressMap())
++        for (BinaryBasicBlock &BB : BF)
++          for (MCInst &Inst : BB)
++            BC.MIB->clearOffset(Inst);
++    }
++  if (!opts::CMOVBranchifySites.empty()) {
++    std::error_code EC;
++    raw_fd_ostream OS(opts::CMOVBranchifySites, EC);
++    if (EC)
++      return invalid(Twine("cannot write manifest: ") + EC.message());
++    OS << json::Value(json::Object{{"schema_version", 1},
++                                   {"binary_sha256", *Hash},
++                                   {"host_cpu", sys::getHostCPUName()},
++                                   {"sites", std::move(Manifest)}})
++       << '\n';
++  }
++  BC.outs() << "BOLT-INFO: CMOV branchify: " << Candidates << " candidates, "
++            << Converted << " converted, " << RejectedProfile
++            << " rejected by admission\n";
++  return Error::success();
++}
+diff --git a/bolt/lib/Passes/CMakeLists.txt b/bolt/lib/Passes/CMakeLists.txt
+index a7514d4be..bc63c5005 100644
+--- a/bolt/lib/Passes/CMakeLists.txt
++++ b/bolt/lib/Passes/CMakeLists.txt
+@@ -6,6 +6,7 @@ add_llvm_library(LLVMBOLTPasses
+   BinaryPasses.cpp
+   BranchLivenessUtils.cpp
+   CMOVConversion.cpp
++  CMOVBranchify.cpp
+   CacheMetrics.cpp
+   DataflowAnalysis.cpp
+   DataflowInfoManager.cpp
+diff --git a/bolt/lib/Rewrite/BinaryPassManager.cpp b/bolt/lib/Rewrite/BinaryPassManager.cpp
+index 3d77ff10e..0a9cf884d 100644
+--- a/bolt/lib/Rewrite/BinaryPassManager.cpp
++++ b/bolt/lib/Rewrite/BinaryPassManager.cpp
+@@ -12,6 +12,7 @@
+ #include "bolt/Passes/AllocCombiner.h"
+ #include "bolt/Passes/AsmDump.h"
+ #include "bolt/Passes/CMOVConversion.h"
++#include "bolt/Passes/CMOVBranchify.h"
+ #include "bolt/Passes/FixRISCVCallsPass.h"
+ #include "bolt/Passes/FixRelaxationPass.h"
+ #include "bolt/Passes/FrameOptimizer.h"
+@@ -410,6 +411,12 @@ Error BinaryFunctionPassManager::runAllPasses(BinaryContext &BC) {
+ 
+   Manager.registerPass(std::make_unique<ValidateMemRefs>(NeverPrint));
+ 
++  // Run before instrumentation and other instruction/CFG changes: site IDs
++  // refer to exact original instruction offsets.
++  Manager.registerPass(std::make_unique<CMOVBranchify>(),
++                       opts::CMOVBranchify || opts::CMOVBranchifyRuntime || opts::CMOVBranchifyCandidate || opts::CMOVBranchifyProbe ||
++                           !opts::CMOVBranchifySites.empty());
++
+   if (opts::Instrument)
+     Manager.registerPass(std::make_unique<Instrumentation>(NeverPrint));
+   else if (opts::Hugify)
+diff --git a/bolt/lib/Rewrite/RewriteInstance.cpp b/bolt/lib/Rewrite/RewriteInstance.cpp
+index 6ac233eb6..9d3eaa123 100644
+--- a/bolt/lib/Rewrite/RewriteInstance.cpp
++++ b/bolt/lib/Rewrite/RewriteInstance.cpp
+@@ -5670,7 +5670,8 @@ void RewriteInstance::patchELFSectionHeaderTable(ELFObjectFile<ELFT> *File) {
+ 
+   if (BC->HasRelocations) {
+     RuntimeLibrary *RtLibrary = BC->getRuntimeLibrary();
+-    if (RtLibrary && opts::RuntimeLibInitHook == opts::RLIH_ENTRY_POINT) {
++    if (RtLibrary && RtLibrary->getRuntimeStartAddress() &&
++        opts::RuntimeLibInitHook == opts::RLIH_ENTRY_POINT) {
+       NewEhdr.e_entry = RtLibrary->getRuntimeStartAddress();
+       BC->outs()
+           << "BOLT-INFO: runtime library initialization was hooked via ELF "
+diff --git a/bolt/lib/Target/X86/X86MCPlusBuilder.cpp b/bolt/lib/Target/X86/X86MCPlusBuilder.cpp
+index f2a52e188..e39c033b7 100644
+--- a/bolt/lib/Target/X86/X86MCPlusBuilder.cpp
++++ b/bolt/lib/Target/X86/X86MCPlusBuilder.cpp
+@@ -92,6 +92,24 @@ static InstructionListType createIncMemory(const MCSymbol *Target,
+ 
+ class X86MCPlusBuilder : public MCPlusBuilder {
+ public:
++  InstructionListType
++  createCMOVRuntimeEntry(const MCSymbol *Original, const MCSymbol *Branch,
++                         const MCSymbol *Runtime, MCContext *Ctx) override {
++    InstructionListType Code;
++    auto Address = [&](unsigned Reg, const MCSymbol *Symbol) {
++      Code.push_back(MCInstBuilder(X86::LEA64r)
++                         .addReg(Reg).addReg(X86::RIP).addImm(1).addReg(0)
++                         .addExpr(MCSymbolRefExpr::create(Symbol, *Ctx))
++                         .addReg(0));
++    };
++    Address(X86::R8, Original);
++    Address(X86::R9, Branch);
++    MCInst Jump;
++    createTailCall(Jump, Runtime, Ctx);
++    Code.push_back(Jump);
++    return Code;
++  }
++
+   using MCPlusBuilder::MCPlusBuilder;
+ 
+   std::unique_ptr<MCSymbolizer>
+@@ -1812,6 +1830,27 @@ public:
+     return true;
+   }
+ 
++  bool convertConditionalMoveToMove(MCInst &Inst, unsigned &CC) const override {
++    // 32-bit CMOV zeroes the upper half even when not selected. Memory CMOV
++    // also performs a load when not selected. Neither can become plain MOV.
++    if (Inst.getOpcode() != X86::CMOV64rr || Inst.getFlags() ||
++        MCPlus::getNumPrimeOperands(Inst) != 4 ||
++        !Inst.getOperand(0).isReg() || !Inst.getOperand(1).isReg() ||
++        !Inst.getOperand(2).isReg() || !Inst.getOperand(3).isImm() ||
++        Inst.getOperand(0).getReg() != Inst.getOperand(1).getReg())
++      return false;
++    const MCPhysReg Dest = Inst.getOperand(0).getReg();
++    if (Dest == X86::RSP || Dest == X86::RBP)
++      return false;
++    CC = Inst.getOperand(3).getImm();
++    if (getInvertedCondCode(CC) == X86::COND_INVALID)
++      return false;
++    Inst.erase(Inst.begin() + 3);
++    Inst.erase(Inst.begin() + 1);
++    Inst.setOpcode(X86::MOV64rr);
++    return true;
++  }
++
+   bool lowerTailCall(MCInst &Inst) override {
+     if (Inst.getOpcode() == X86::JMP_4 && isTailCall(Inst)) {
+       Inst.setOpcode(X86::JMP_1);
+diff --git a/bolt/lib/Utils/CommandLineOpts.cpp b/bolt/lib/Utils/CommandLineOpts.cpp
+index 57838e2fe..6df5d9b6a 100644
+--- a/bolt/lib/Utils/CommandLineOpts.cpp
++++ b/bolt/lib/Utils/CommandLineOpts.cpp
+@@ -42,6 +42,34 @@ cl::OptionCategory BoltInstrCategory("BOLT instrumentation options");
+ cl::OptionCategory HeatmapCategory("Heatmap options");
+ cl::OptionCategory BinaryAnalysisCategory("BinaryAnalysis options");
+ 
++cl::opt<bool> CMOVBranchify(
++    "cmov-branchify", cl::desc("branchify validated, biased 64-bit CMOV groups"),
++    cl::init(false), cl::cat(BoltOptCategory));
++cl::opt<bool> CMOVBranchifyRuntime(
++    "cmov-branchify-runtime",
++    cl::desc("clone a declared batch-ABI CMOV kernel and inject runtime admission"),
++    cl::init(false), cl::cat(BoltOptCategory));
++cl::opt<bool> CMOVBranchifyProbe(
++    "cmov-branchify-probe",
++    cl::desc("expose safe CMOV predicates for -instrument training"),
++    cl::init(false), cl::cat(BoltInstrCategory));
++cl::opt<bool> CMOVBranchifyCandidate(
++    "cmov-branchify-candidate",
++    cl::desc("generate a candidate for offline timing, without validation approval"),
++    cl::init(false), cl::Hidden, cl::cat(BoltOptCategory));
++cl::opt<std::string> CMOVBranchifyProfile(
++    "cmov-branchify-profile", cl::desc("validated CMOV predicate JSON profile"),
++    cl::init(""), cl::cat(BoltOptCategory));
++cl::opt<std::string> CMOVBranchifySites(
++    "cmov-branchify-sites", cl::desc("write CMOV site manifest as JSON"),
++    cl::init(""), cl::cat(BoltOutputCategory));
++cl::opt<unsigned> CMOVBranchifyMinBias(
++    "cmov-branchify-min-bias", cl::desc("minimum dominant predicate percent"),
++    cl::init(95), cl::cat(BoltOptCategory));
++cl::opt<unsigned> CMOVBranchifyMinCount(
++    "cmov-branchify-min-count", cl::desc("minimum predicate training count"),
++    cl::init(10000), cl::cat(BoltOptCategory));
++
+ cl::opt<unsigned> AlignText("align-text",
+                             cl::desc("alignment of .text section"), cl::Hidden,
+                             cl::cat(BoltCategory));
+diff --git a/bolt/runtime/CMakeLists.txt b/bolt/runtime/CMakeLists.txt
+index 9f7b6b1ba..118f15237 100644
+--- a/bolt/runtime/CMakeLists.txt
++++ b/bolt/runtime/CMakeLists.txt
+@@ -22,12 +22,18 @@ add_library(bolt_rt_hugify STATIC
+   ${CMAKE_CURRENT_BINARY_DIR}/config.h
+   )
+ set_target_properties(bolt_rt_hugify PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "lib${LLVM_LIBDIR_SUFFIX}")
++# RuntimeLibrary links archive members in order; load the self-contained
++# observer before the entry object that references it.
++add_library(bolt_rt_cmov STATIC cmov_observe.cpp cmov.cpp)
++set_target_properties(bolt_rt_cmov PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "lib${LLVM_LIBDIR_SUFFIX}")
+ 
+ if(NOT BOLT_BUILT_STANDALONE)
+   add_custom_command(TARGET bolt_rt_instr POST_BUILD
+     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/lib${LLVM_LIBDIR_SUFFIX}/libbolt_rt_instr.a" "${LLVM_LIBRARY_DIR}")
+   add_custom_command(TARGET bolt_rt_hugify POST_BUILD
+     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/lib${LLVM_LIBDIR_SUFFIX}/libbolt_rt_hugify.a" "${LLVM_LIBRARY_DIR}")
++  add_custom_command(TARGET bolt_rt_cmov POST_BUILD
++    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/lib${LLVM_LIBDIR_SUFFIX}/libbolt_rt_cmov.a" "${LLVM_LIBRARY_DIR}")
+ endif()
+ 
+ set(BOLT_RT_FLAGS
+@@ -65,10 +71,12 @@ endif()
+ target_compile_options(bolt_rt_instr PRIVATE ${BOLT_RT_FLAGS})
+ target_include_directories(bolt_rt_instr PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+ target_compile_options(bolt_rt_hugify PRIVATE ${BOLT_RT_FLAGS})
++target_compile_options(bolt_rt_cmov PRIVATE ${BOLT_RT_FLAGS})
+ target_include_directories(bolt_rt_hugify PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ install(TARGETS bolt_rt_instr DESTINATION "lib${LLVM_LIBDIR_SUFFIX}")
+ install(TARGETS bolt_rt_hugify DESTINATION "lib${LLVM_LIBDIR_SUFFIX}")
++install(TARGETS bolt_rt_cmov DESTINATION "lib${LLVM_LIBDIR_SUFFIX}")
+ 
+ if (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" AND CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+   add_library(bolt_rt_instr_osx STATIC
+diff --git a/bolt/runtime/cmov.cpp b/bolt/runtime/cmov.cpp
+new file mode 100644
+index 000000000..7c6077348
+--- /dev/null
++++ b/bolt/runtime/cmov.cpp
+@@ -0,0 +1,33 @@
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++#include "cmov.h"
++
++namespace bolt_cmov {
++extern "C" uint64_t __bolt_cmov_adapt_v1(
++    const void *Context, const Slice *Begin, const Slice *End, Counters *Out,
++    Kernel Original, Kernel Branch) {
++  Counters C{};
++  const Slice *Next = Begin;
++  uint64_t Sum = 0;
++  bool Eligible = Begin != End && size_t(End - Begin) >= MinimumBatches;
++  if (Eligible)
++    for (const Slice *S = Begin; S != End; ++S)
++      if (S->begin == S->end || size_t(S->end - S->begin) != RequiredQueries) {
++        Eligible = false;
++        break;
++      }
++  if (Eligible)
++    Sum = __bolt_cmov_observe_v1(Context, &Next, End, &C, Original, Branch);
++  else {
++    C.short_bypass = 1;
++    C.fallback_batches = Begin == End ? 0 : End - Begin;
++  }
++  // The observation frame has returned before this common fallback loop.
++  // Every input batch is consumed exactly once, even after a clock failure.
++  for (; Next != End; ++Next)
++    Sum += Original(Context, Next->begin, Next->end);
++  if (Out)
++    *Out = C;
++  return Sum;
++}
++}
+diff --git a/bolt/runtime/cmov.h b/bolt/runtime/cmov.h
+new file mode 100644
+index 000000000..53088daa7
+--- /dev/null
++++ b/bolt/runtime/cmov.h
+@@ -0,0 +1,24 @@
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++#pragma once
++#include <stddef.h>
++#include <stdint.h>
++
++// Cooperative Linux x86-64 SysV ABI v1. Context is opaque to the runtime.
++// Kernel: checksum(ctx, queries_begin, queries_end), preserving input order.
++// Entry: checksum(ctx, slices_begin, slices_end, optional_counters).
++// Kernels must not throw; all ranges must be valid as in the original driver.
++namespace bolt_cmov {
++struct Slice { const uint64_t *begin; const uint64_t *end; };
++struct Counters {
++  uint64_t trial_batches, active_batches, controls, clock_reads;
++  uint64_t fallback_batches, suspicion_controls;
++  unsigned entered, rejection, short_bypass;
++};
++using Kernel = uint64_t (*)(const void *, const uint64_t *, const uint64_t *);
++constexpr size_t MinimumBatches = 512, RequiredQueries = 4096;
++extern "C" uint64_t __bolt_cmov_observe_v1(
++    const void *, const Slice **, const Slice *, Counters *, Kernel, Kernel);
++extern "C" uint64_t __bolt_cmov_adapt_v1(
++    const void *, const Slice *, const Slice *, Counters *, Kernel, Kernel);
++}
+diff --git a/bolt/runtime/cmov_observe.cpp b/bolt/runtime/cmov_observe.cpp
+new file mode 100644
+index 000000000..7a5921e32
+--- /dev/null
++++ b/bolt/runtime/cmov_observe.cpp
+@@ -0,0 +1,107 @@
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++#include "cmov.h"
++
++namespace bolt_cmov {
++#ifdef BOLT_CMOV_TEST_CLOCK
++extern bool test_clock(uint64_t &);
++#endif
++static bool clock_read(uint64_t &NS, Counters &C) {
++  ++C.clock_reads;
++#ifdef BOLT_CMOV_TEST_CLOCK
++  return test_clock(NS);
++#elif defined(__x86_64__) && defined(__linux__)
++  struct Stamp { long seconds, nanoseconds; } T{};
++  long Status;
++  // CLOCK_THREAD_CPUTIME_ID; Linux x86-64 clock_gettime syscall. No glibc,
++  // globals, writable shared state, environment variables or loader hooks.
++  asm volatile("syscall" : "=a"(Status)
++               : "a"(228L), "D"(3L), "S"(&T)
++               : "rcx", "r11", "memory", "cc");
++  if (Status || T.seconds < 0 || T.nanoseconds < 0 ||
++      T.nanoseconds >= 1000000000L ||
++      uint64_t(T.seconds) > (UINT64_MAX - uint64_t(T.nanoseconds))/1000000000ULL)
++    return false;
++  NS = uint64_t(T.seconds)*1000000000ULL + uint64_t(T.nanoseconds);
++  return true;
++#else
++  return false;
++#endif
++}
++
++static bool above_ratio(uint64_t A, uint64_t B, unsigned Percent) {
++  return __uint128_t(A)*100 >= __uint128_t(B)*Percent;
++}
++
++extern "C" uint64_t __bolt_cmov_observe_v1(
++    const void *Context, const Slice **Next, const Slice *End, Counters *Out,
++    Kernel Original, Kernel Branch) {
++  const Slice *B = *Next;
++  Counters C{};
++  uint64_t Sum = 0, Reference = 0, Recent[3] = {};
++  unsigned Cursor = 0;
++  auto Fallback = [&](unsigned Reason) {
++    C.rejection = Reason;
++    C.fallback_batches = End-B;
++    *Next = B;
++    *Out = C;
++    return Sum;
++  };
++  auto Measured = [&](Kernel K, uint64_t &Cost) {
++    uint64_t Start, Stop;
++    if (!clock_read(Start, C))
++      return false;
++    Sum += K(Context, B->begin, B->end);
++    ++B;
++    if (!clock_read(Stop, C) || Stop <= Start)
++      return false;
++    Cost = Stop-Start;
++    return true;
++  };
++  for (unsigned Pair = 0; Pair != 3; ++Pair) {
++    uint64_t Trial;
++    ++C.controls;
++    if (!Measured(Original, Reference))
++      return Fallback(1);
++    ++C.trial_batches;
++    if (!Measured(Branch, Trial))
++      return Fallback(1);
++    if (above_ratio(Trial, Reference, 90))
++      return Fallback(2);
++    Recent[Pair] = Trial;
++  }
++  C.entered = 1;
++  unsigned SinceControl = 0;
++  while (B != End) {
++    if (SinceControl == 16) {
++      ++C.controls;
++      if (!Measured(Original, Reference))
++        return Fallback(1);
++      SinceControl = 0;
++      continue;
++    }
++    uint64_t Cost;
++    ++C.active_batches;
++    if (!Measured(Branch, Cost))
++      return Fallback(1);
++    ++SinceControl;
++    Recent[Cursor] = Cost;
++    Cursor = (Cursor+1)%3;
++    const uint64_t X = Recent[0], Y = Recent[1], Z = Recent[2];
++    const uint64_t Median = X < Y ? (Y < Z ? Y : (X < Z ? Z : X))
++                                 : (X < Z ? X : (Y < Z ? Z : Y));
++    if (above_ratio(Median, Reference, 95) && B != End) {
++      ++C.controls;
++      ++C.suspicion_controls;
++      if (!Measured(Original, Reference))
++        return Fallback(1);
++      SinceControl = 0;
++      if (above_ratio(Median, Reference, 95))
++        return Fallback(3);
++    }
++  }
++  *Next = B;
++  *Out = C;
++  return Sum;
++}
++}
+diff --git a/bolt/test/Inputs/cmov-branchify-profile.py b/bolt/test/Inputs/cmov-branchify-profile.py
+new file mode 100644
+index 000000000..4fb256569
+--- /dev/null
++++ b/bolt/test/Inputs/cmov-branchify-profile.py
+@@ -0,0 +1,20 @@
++import json
++import sys
++
++data = json.load(open(sys.argv[1]))
++for site in data['sites']:
++    site.update(true_count=100000, false_count=0, validated=True,
++                validation_speedup_lower=1.5)
++if len(sys.argv) > 3:
++    mode = sys.argv[3]
++    if mode == 'unvalidated':
++        for site in data['sites']:
++            site['validated'] = False
++    elif mode == 'unbiased':
++        for site in data['sites']:
++            site.update(true_count=50000, false_count=50000)
++    elif mode == 'wrong-hash':
++        data['binary_sha256'] = '0'*64
++    elif mode == 'wrong-cpu':
++        data['host_cpu'] = 'incompatible-test-cpu'
++json.dump(data, open(sys.argv[2], 'w'))
+diff --git a/bolt/test/X86/cmov-branchify.s b/bolt/test/X86/cmov-branchify.s
+new file mode 100644
+index 000000000..dbfa00c81
+--- /dev/null
++++ b/bolt/test/X86/cmov-branchify.s
+@@ -0,0 +1,105 @@
++# REQUIRES: system-linux
++# RUN: llvm-mc -filetype=obj -triple x86_64-unknown-unknown %s -o %t.o
++# RUN: %clang %cflags %t.o -o %t.exe -Wl,-q -nostdlib -no-pie
++# RUN: llvm-bolt %t.exe -o %t.enumerated --lite=0 --cmov-branchify-sites=%t.sites
++# RUN: llvm-bolt %t.exe -o %t.off --lite=0
++# RUN: %python %S/../Inputs/cmov-branchify-profile.py %t.sites %t.profile
++# RUN: llvm-bolt %t.exe -o %t.on --lite=0 --cmov-branchify --cmov-branchify-profile=%t.profile --verify-cfg | FileCheck %s --check-prefix=STATS
++# RUN: llvm-objdump -d --no-show-raw-insn --disassemble-symbols=subject %t.on | FileCheck %s --check-prefix=ON
++# RUN: llvm-objdump -d --no-show-raw-insn --disassemble-symbols=subject %t.off | FileCheck %s --check-prefix=OFF
++# RUN: llvm-bolt %t.exe -o %t.probe -instrument --instrumentation-sleep-time=1 --cmov-branchify-probe | FileCheck %s --check-prefix=STATS
++# RUN: %python %S/../Inputs/cmov-branchify-profile.py %t.sites %t.unvalidated unvalidated
++# RUN: llvm-bolt %t.exe -o %t.reject --lite=0 --cmov-branchify --cmov-branchify-profile=%t.unvalidated --verify-cfg | FileCheck %s --check-prefix=REJECT
++# RUN: llvm-objdump -d --no-show-raw-insn --disassemble-symbols=subject %t.reject | FileCheck %s --check-prefix=OFF
++# RUN: %python %S/../Inputs/cmov-branchify-profile.py %t.sites %t.unbiased unbiased
++# RUN: llvm-bolt %t.exe -o %t.reject2 --lite=0 --cmov-branchify --cmov-branchify-profile=%t.unbiased --verify-cfg | FileCheck %s --check-prefix=REJECT
++# RUN: %python %S/../Inputs/cmov-branchify-profile.py %t.sites %t.bad-hash wrong-hash
++# RUN: not llvm-bolt %t.exe -o %t.bad --cmov-branchify --cmov-branchify-profile=%t.bad-hash 2>&1 | FileCheck %s --check-prefix=HASH
++# RUN: %python %S/../Inputs/cmov-branchify-profile.py %t.sites %t.bad-cpu wrong-cpu
++# RUN: not llvm-bolt %t.exe -o %t.bad --cmov-branchify --cmov-branchify-profile=%t.bad-cpu 2>&1 | FileCheck %s --check-prefix=CPU
++# RUN: not llvm-bolt %t.exe -o %t.bad --cmov-branchify 2>&1 | FileCheck %s --check-prefix=MISSING
++# STATS: CMOV branchify: 1 candidates, 1 converted
++# REJECT: CMOV branchify: 1 candidates, 0 converted, 1 rejected
++# HASH: input SHA256 mismatch
++# CPU: profile CPU mismatch
++# MISSING: requires -cmov-branchify-profile
++# ON-LABEL: <subject>:
++# ON-NOT: cmov
++# ON: j{{b|ae}}
++# ON-NOT: cmov
++# ON: retq
++# OFF-LABEL: <subject>:
++# OFF-COUNT-2: cmovaeq
++
++.text
++.globl _start
++.type _start,@function
++_start:
++  call subject
++  mov $60, %eax
++  xor %edi, %edi
++  syscall
++.size _start, .-_start
++
++.globl subject
++.type subject,@function
++subject:
++.cfi_startproc
++  mov $8, %ecx
++.Lloop:
++  cmp %rsi, %rdi
++  cmovae %r8, %rax
++  cmovae %r9, %rdx
++  dec %ecx
++  jne .Lloop
++  ret
++.cfi_endproc
++.size subject, .-subject
++
++.globl reject32
++.type reject32,@function
++reject32:
++  cmp %rsi, %rdi
++  cmovae %r8d, %eax
++  cmovae %r9d, %edx
++  ret
++.size reject32, .-reject32
++
++.globl reject_memory
++.type reject_memory,@function
++reject_memory:
++  cmp %rsi, %rdi
++  cmovae (%r8), %rax
++  cmovae (%r9), %rdx
++  ret
++.size reject_memory, .-reject_memory
++
++.globl reject_stack
++.type reject_stack,@function
++reject_stack:
++  cmp %rsi, %rdi
++  cmovae %r8, %rsp
++  cmovae %r9, %rdx
++  ret
++.size reject_stack, .-reject_stack
++
++.globl reject_mixed
++.type reject_mixed,@function
++reject_mixed:
++  cmp %rsi, %rdi
++  cmovae %r8, %rax
++  cmovb %r9, %rdx
++  ret
++.size reject_mixed, .-reject_mixed
++
++.globl reject_entry
++.type reject_entry,@function
++reject_entry:
++  cmp %rsi, %rdi
++  jae .Lmiddle
++  cmovae %r8, %rax
++.Lmiddle:
++  cmovae %r9, %rdx
++  ret
++.size reject_entry, .-reject_entry
++.section .note.GNU-stack,"",@progbits
