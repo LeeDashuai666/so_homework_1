@@ -122,6 +122,8 @@ def main():
     log=(out/'runtime-optimize.log').read_text()
     injected='CMOV runtime: retained original kernel' in log
     if injected!=approved:raise RuntimeError('runtime injection and approval disagree')
+    zero_work='proved zero-work prefix, lifted batch fast return' in log
+    if injected and not zero_work:raise RuntimeError('missing zero-work proof')
     command(['nm','-S',on],'output-symbols')
     for symbol in ('cmov_kernel_v1','__bolt_cmov_branch_v1','cmov_batch_v1'):
         command(['objdump','-d','--disassemble='+symbol,on],symbol+'-disassembly')
@@ -133,6 +135,16 @@ def main():
             enabled=run(on,'guarded',case,size,71049)
             if baseline['runs'][0]['checksum']!=enabled['runs'][0]['checksum']:raise RuntimeError('smoke output mismatch')
             smoke.append({'size':size,'case':case,'baseline':baseline,'enabled':enabled})
+    for case in ('low95','uniform','short-uniform1'):
+        baseline=run(off,'guarded',case,0,71049)
+        enabled=run(on,'guarded',case,0,71049)
+        result=enabled['runs'][0]
+        if result['checksum']!=baseline['runs'][0]['checksum'] or result['checksum']!=0:
+            raise RuntimeError('empty-table output mismatch')
+        if injected and (not result['short_bypass'] or result['clock_reads'] or
+                         result['active_batches'] or result['trial_batches']):
+            raise RuntimeError('empty-table guard was not bypassed')
+        smoke.append({'size':0,'case':case,'baseline':baseline,'enabled':enabled})
     write(out/'smoke.json',smoke)
     rejected=dict(profile);rejected['sites']=[]
     write(out/'rejected-profile.json',rejected)
@@ -141,6 +153,7 @@ def main():
     identity=pipeline.executable_hash(reject)==pipeline.executable_hash(off)
     if not identity:raise RuntimeError('static rejection changed executable sections')
     meta={'runtime_bolt_option_implemented':True,'injected':injected,
+          'zero_work_fast_return':zero_work,
           'runtime_archive_sha256':protocol['runtime_archive_sha256'],
           'input_sha256':sha(original),'off_sha256':sha(off),'on_sha256':sha(on),
           'static_rejection_executable_identical':identity,

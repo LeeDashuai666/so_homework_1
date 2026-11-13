@@ -1,7 +1,0 @@
-{
-  "exit_code": 0,
-  "discovered": 775,
-  "supported_tests": 755,
-  "tool": "final llvm-bolt",
-  "all_supported_passed": true
-}

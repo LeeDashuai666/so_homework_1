@@ -16,14 +16,17 @@ def main():
  run('static-semantics',[py,ROOT/'project/cmov_branchify/tests.py','--output',out/'static-tests'])
  run('build-and-calibrate',[py,app/'build.py','--compiler','clang++-18','--output',out/'build'])
  meta=json.loads((out/'build/build.json').read_text())
- if meta['injected']:run('flag-rejections-code-audit',[py,app/'tests.py','--build',out/'build','--output',out/'flag-tests'])
+ if meta['injected']:
+  run('flag-rejections-code-audit',[py,app/'tests.py','--build',out/'build','--output',out/'flag-tests'])
+  run('zero-work-functional',[py,app/'test_zero_work.py','--compiler','clang++-18','--build',out/'build','--output',out/'zero-work-tests'])
  argv=[py,app/'verify_runtime.py','--build',out/'build','--output',out/'functional.json']
  if a.mode=='smoke':argv+=['--seeds','79879']
  run('actual-elf-functional',argv)
  if a.mode!='functional' and meta['injected']:
-  argv=[py,app/('compare.py' if a.mode=='full' else 'run.py'),'--build',out/'build','--output',out/'performance']
+  argv=[py,app/'run.py','--build',out/'build','--output',out/'performance']
   if a.mode=='smoke':argv+=['--blocks','3','--cases','low95','uniform','short-uniform1']
   run('final-elf-performance',argv)
+  run('zero-work-performance',[py,app/'run.py','--build',out/'build','--output',out/'zero-performance','--boundary-suite','--blocks','31' if a.mode=='full' else '7'])
  result={'mode':a.mode,'checks':checks,'runtime_injected':meta['injected'],'adaptive_bolt_integration_completed':True,'performance_acceptance_claimed':False,'note':'Read performance/decision.json and uncertainty. Successful execution is not a universal performance guarantee.' if meta['injected'] else 'Independent calibration rejected this host; flag-on preserves original executable code. No protected speedup claimed.'}
  (out/'result.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2),flush=True)
 if __name__=='__main__':main()

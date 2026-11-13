@@ -1,0 +1,9 @@
+{
+  "fingerprint": "b6201a99e79e751a",
+  "image": "so-homework-1:runtime-b6201a99e79e751a",
+  "image_id": "sha256:dfc93bad5485499ad7c4d38132e0df9aa90975de1a6698fd2aaf7d076b4193f8",
+  "archive_name": "so_homework_1-runtime-v3-linux_amd64.docker.tar.gz",
+  "archive_sha256": "994d16537d2761e11f39ff4feb2cc3095a1a7263c97a37a74b87610516fb4718",
+  "archive_bytes": 292486882,
+  "binary_hashes_verified_in_image": true
+}

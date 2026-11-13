@@ -35,7 +35,7 @@ index c41ad0602..3b99d9dd7 100644
  
    bool replayCFIInstrs(int32_t FromState, int32_t ToState,
 diff --git a/bolt/include/bolt/Core/MCPlusBuilder.h b/bolt/include/bolt/Core/MCPlusBuilder.h
-index a23863505..30606e5ce 100644
+index a23863505..4357c83b7 100644
 --- a/bolt/include/bolt/Core/MCPlusBuilder.h
 +++ b/bolt/include/bolt/Core/MCPlusBuilder.h
 @@ -1752,6 +1752,13 @@ public:
@@ -52,7 +52,7 @@ index a23863505..30606e5ce 100644
    virtual bool lowerTailCall(MCInst &Inst) {
      llvm_unreachable("not implemented");
      return false;
-@@ -2568,6 +2575,14 @@ public:
+@@ -2568,6 +2575,30 @@ public:
      return 2;
    }
  
@@ -62,6 +62,22 @@ index a23863505..30606e5ce 100644
 +  createCMOVRuntimeEntry(const MCSymbol *Original, const MCSymbol *Branch,
 +                         const MCSymbol *Runtime, MCContext *Ctx) {
 +    llvm_unreachable("runtime CMOV batch ABI is only supported on x86-64");
++  }
++
++  struct CMOVRuntimeEntryCode {
++    BlocksVectorTy Blocks;
++    std::vector<std::pair<unsigned, unsigned>> Edges;
++  };
++
++  /// Prove the supported query-empty / context-empty zero-return prefix of a
++  /// leaf kernel, then lift it to the cooperative sum-of-kernels batch entry.
++  /// The context displacements come from the matched instructions. An empty
++  /// plan means the caller must retain the unmodified forwarding entry.
++  virtual CMOVRuntimeEntryCode createCMOVRuntimeZeroWorkEntry(
++      ArrayRef<MCInst> Entry, ArrayRef<MCInst> ContextCheck,
++      ArrayRef<MCInst> ZeroReturn, const MCSymbol *Original,
++      const MCSymbol *Branch, const MCSymbol *Runtime, MCContext *Ctx) {
++    return {};
 +  }
 +
    // AliasMap caches a mapping of registers to the set of registers that
@@ -151,10 +167,10 @@ index 2b314098c..fcfc8c308 100644
          BC.MIB->clearOffset(Inst);
 diff --git a/bolt/lib/Passes/CMOVBranchify.cpp b/bolt/lib/Passes/CMOVBranchify.cpp
 new file mode 100644
-index 000000000..d9c6e9fd3
+index 000000000..17dec763c
 --- /dev/null
 +++ b/bolt/lib/Passes/CMOVBranchify.cpp
-@@ -0,0 +1,468 @@
+@@ -0,0 +1,527 @@
 +//===- bolt/Passes/CMOVBranchify.cpp - Profile-informed CMOV groups --------===//
 +//
 +// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
@@ -415,6 +431,41 @@ index 000000000..d9c6e9fd3
 +  }
 +  return Clone;
 +}
++
++MCPlusBuilder::CMOVRuntimeEntryCode zeroWorkEntry(
++    BinaryFunction &Kernel, const MCSymbol *Branch, const MCSymbol *Runtime) {
++  auto &BC = Kernel.getBinaryContext();
++  auto &MIB = *BC.MIB;
++  auto RealInstructions = [&](const BinaryBasicBlock &BB) {
++    SmallVector<MCInst, 8> Instructions;
++    for (const MCInst &I : BB)
++      if (!MIB.isPseudo(I))
++        Instructions.push_back(I);
++    return Instructions;
++  };
++  const BinaryBasicBlock &Entry = Kernel.front();
++  const auto EntryCode = RealInstructions(Entry);
++  if (EntryCode.size() != 2 || Entry.succ_size() != 2 ||
++      !MIB.isConditionalBranch(EntryCode.back()))
++    return {};
++  const BinaryBasicBlock *Zero =
++      Kernel.getBasicBlockForLabel(MIB.getTargetSymbol(EntryCode.back()));
++  if (!Zero)
++    return {};
++  const BinaryBasicBlock *Check = nullptr;
++  for (const BinaryBasicBlock *Succ : Entry.successors())
++    if (Succ != Zero)
++      Check = Succ;
++  if (!Check || Check->succ_size() != 2 || Zero->succ_size() != 0)
++    return {};
++  const auto CheckCode = RealInstructions(*Check);
++  if (CheckCode.empty() || !MIB.isConditionalBranch(CheckCode.back()) ||
++      MIB.getTargetSymbol(CheckCode.back()) != Zero->getLabel())
++    return {};
++  return MIB.createCMOVRuntimeZeroWorkEntry(
++      EntryCode, CheckCode, RealInstructions(*Zero), Kernel.getSymbol(),
++      Branch, Runtime, BC.Ctx.get());
++}
 +} // namespace
 +
 +Error CMOVBranchify::runOnFunctions(BinaryContext &BC) {
@@ -541,6 +592,14 @@ index 000000000..d9c6e9fd3
 +        ++RejectedProfile;
 +        continue;
 +      }
++      // An unrecognised early-exit prefix must not acquire an unbounded
++      // monitoring cost. Keep the original forwarding code in that case.
++      auto EntryCode = zeroWorkEntry(BF, Kernel->getSymbol(), Kernel->getSymbol());
++      if (EntryCode.Blocks.empty()) {
++        ++RejectedProfile;
++        BC.outs() << "BOLT-INFO: CMOV runtime: unproved zero-work prefix; preserving code\n";
++        continue;
++      }
 +      DenseMap<const BinaryBasicBlock *, BinaryBasicBlock *> Map;
 +      BinaryFunction *Clone = cloneKernel(BF, Map);
 +      Site Copy = *S;
@@ -559,12 +618,28 @@ index 000000000..d9c6e9fd3
 +      BinaryBasicBlock &Head = ABIEntry->front();
 +      Head.clear();
 +      Head.removeAllSuccessors();
-+      Head.addInstructions(BC.MIB->createCMOVRuntimeEntry(
-+          Kernel->getSymbol(), Clone->getSymbol(),
-+          Thunk->getSymbol(), BC.Ctx.get()));
++      EntryCode = zeroWorkEntry(BF, Clone->getSymbol(), Thunk->getSymbol());
++      assert(EntryCode.Blocks.size() == 9 && "zero-work proof changed");
++      // The proved empty-query scan and zero-return blocks are cold under the
++      // training profile; normal first-slice calls fall through to the guard.
++      auto Hot = [](unsigned I) { return I < 3 || I > 6; };
++      SmallVector<BinaryBasicBlock *, 8> EntryBlocks{&Head};
++      for (unsigned I = 1; I != EntryCode.Blocks.size(); ++I)
++        EntryBlocks.push_back(ABIEntry->addBasicBlock(EntryCode.Blocks[I].first));
++      for (unsigned I = 0; I != EntryCode.Blocks.size(); ++I) {
++        EntryBlocks[I]->setCFIState(Head.getCFIState());
++        EntryBlocks[I]->addInstructions(std::move(EntryCode.Blocks[I].second));
++        EntryBlocks[I]->setExecutionCount(Hot(I) ? Head.getExecutionCount() : 0);
++      }
++      for (auto [From, To] : EntryCode.Edges)
++        EntryBlocks[From]->addSuccessor(EntryBlocks[To], Hot(From) && Hot(To) ? Head.getExecutionCount() : 0, 0);
++      ABIEntry->constructDomTree();
++      ABIEntry->calculateLoopInfo();
++      assert(ABIEntry->validateCFG() && "invalid zero-work entry CFG");
 +      BC.setRuntimeLibrary(std::make_unique<CMOVRuntimeLibrary>(Thunk));
 +      ++Converted;
 +      BC.outs() << "BOLT-INFO: CMOV runtime: retained original kernel, cloned branch kernel, rewrote batch ABI entry\n";
++      BC.outs() << "BOLT-INFO: CMOV runtime: proved zero-work prefix, lifted batch fast return\n";
 +      continue;
 +    }
 +    // Later sites are split first so earlier instruction indices stay valid.
@@ -675,10 +750,10 @@ index 6ac233eb6..9d3eaa123 100644
        BC->outs()
            << "BOLT-INFO: runtime library initialization was hooked via ELF "
 diff --git a/bolt/lib/Target/X86/X86MCPlusBuilder.cpp b/bolt/lib/Target/X86/X86MCPlusBuilder.cpp
-index f2a52e188..e39c033b7 100644
+index f2a52e188..7c1f1c417 100644
 --- a/bolt/lib/Target/X86/X86MCPlusBuilder.cpp
 +++ b/bolt/lib/Target/X86/X86MCPlusBuilder.cpp
-@@ -92,6 +92,24 @@ static InstructionListType createIncMemory(const MCSymbol *Target,
+@@ -92,6 +92,128 @@ static InstructionListType createIncMemory(const MCSymbol *Target,
  
  class X86MCPlusBuilder : public MCPlusBuilder {
  public:
@@ -700,10 +775,114 @@ index f2a52e188..e39c033b7 100644
 +    return Code;
 +  }
 +
++  CMOVRuntimeEntryCode createCMOVRuntimeZeroWorkEntry(
++      ArrayRef<MCInst> Entry, ArrayRef<MCInst> Check,
++      ArrayRef<MCInst> ZeroReturn, const MCSymbol *Original,
++      const MCSymbol *Branch, const MCSymbol *Runtime,
++      MCContext *Ctx) override {
++    // Deliberately exact: no arbitrary memory operands, stores, stack effects,
++    // flags consumers or context layout assumptions are permitted in the proof.
++    auto Registers = [](const MCInst &I, unsigned Opcode,
++                        std::initializer_list<unsigned> Regs) {
++      if (I.getOpcode() != Opcode ||
++          MCPlus::getNumPrimeOperands(I) != Regs.size())
++        return false;
++      unsigned N = 0;
++      for (unsigned R : Regs)
++        if (!I.getOperand(N).isReg() || I.getOperand(N++).getReg() != R)
++          return false;
++      return true;
++    };
++    auto Load = [](const MCInst &I, unsigned Dest) {
++      return I.getOpcode() == X86::MOV64rm &&
++             MCPlus::getNumPrimeOperands(I) == 6 &&
++             I.getOperand(0).isReg() && I.getOperand(0).getReg() == Dest &&
++             I.getOperand(1).isReg() && I.getOperand(1).getReg() == X86::RDI &&
++             I.getOperand(2).isImm() && I.getOperand(2).getImm() == 1 &&
++             I.getOperand(3).isReg() && !I.getOperand(3).getReg() &&
++             I.getOperand(4).isImm() && isInt<32>(I.getOperand(4).getImm()) &&
++             I.getOperand(5).isReg() && !I.getOperand(5).getReg();
++    };
++    if (Entry.size() != 2 || Check.size() != 6 || ZeroReturn.size() != 2 ||
++        !Registers(Entry[0], X86::CMP64rr, {X86::RSI, X86::RDX}) ||
++        !isConditionalBranch(Entry[1]) || getCondCode(Entry[1]) != X86::COND_E ||
++        !Load(Check[0], X86::RCX) || !Load(Check[1], X86::RDI) ||
++        !Registers(Check[2], X86::SUB64rr, {X86::RDI, X86::RDI, X86::RCX}) ||
++        Check[3].getOpcode() != X86::SAR64ri ||
++        MCPlus::getNumPrimeOperands(Check[3]) != 3 ||
++        !Check[3].getOperand(0).isReg() || Check[3].getOperand(0).getReg() != X86::RDI ||
++        !Check[3].getOperand(1).isReg() || Check[3].getOperand(1).getReg() != X86::RDI ||
++        !Check[3].getOperand(2).isImm() || Check[3].getOperand(2).getImm() != 3 ||
++        !Registers(Check[4], X86::TEST64rr, {X86::RDI, X86::RDI}) ||
++        !isConditionalBranch(Check[5]) || getCondCode(Check[5]) != X86::COND_LE ||
++        !Registers(ZeroReturn[0], X86::XOR32rr, {X86::EAX, X86::EAX, X86::EAX}) ||
++        !Registers(ZeroReturn[1], X86::RET64, {}))
++      return {};
++
++    CMOVRuntimeEntryCode Plan;
++    for (unsigned I = 0; I != 9; ++I)
++      Plan.Blocks.emplace_back(I ? Ctx->createTempSymbol("cmov_zero") : nullptr,
++                               InstructionListType{});
++    auto &Blocks = Plan.Blocks;
++    auto Cond = [&](unsigned From, unsigned To, unsigned CC) {
++      MCInst I;
++      createCondBranch(I, Blocks[To].first, CC, Ctx);
++      Blocks[From].second.push_back(I);
++    };
++    auto LoadAt = [](unsigned Dest, unsigned Base, int64_t Offset) -> MCInst {
++      return MCInstBuilder(X86::MOV64rm).addReg(Dest).addReg(Base).addImm(1)
++          .addReg(0).addImm(Offset).addReg(0);
++    };
++    // No context dereference for an empty batch range. Scan query-empty slices
++    // first: the kernel's query-empty prefix proves those contributions are
++    // zero without touching context, including a null/unused context.
++    Blocks[0].second.push_back(MCInstBuilder(X86::CMP64rr).addReg(X86::RSI).addReg(X86::RDX));
++    Cond(0, 4, X86::COND_E);
++    Blocks[1].second.push_back(MCInstBuilder(X86::MOV64rr).addReg(X86::R11).addReg(X86::RSI));
++    Blocks[2].second.push_back(LoadAt(X86::RAX, X86::R11, 0));
++    Blocks[2].second.push_back(MCInstBuilder(X86::CMP64rm).addReg(X86::RAX)
++        .addReg(X86::R11).addImm(1).addReg(0).addImm(8).addReg(0));
++    Cond(2, 7, X86::COND_NE);
++    Blocks[3].second.push_back(MCInstBuilder(X86::ADD64ri8)
++        .addReg(X86::R11).addReg(X86::R11).addImm(16));
++    Blocks[3].second.push_back(MCInstBuilder(X86::CMP64rr).addReg(X86::R11).addReg(X86::RDX));
++    Cond(3, 2, X86::COND_NE);
++    Blocks[7].second.push_back(LoadAt(X86::RAX, X86::RDI, Check[0].getOperand(4).getImm()));
++    Blocks[7].second.push_back(LoadAt(X86::R10, X86::RDI, Check[1].getOperand(4).getImm()));
++    Blocks[7].second.push_back(MCInstBuilder(X86::CMP64rr).addReg(X86::RAX).addReg(X86::R10));
++    // Equality is a sufficient subset of the kernel's <= 0 test. Keeping the
++    // narrower predicate avoids assuming anything about malformed lengths.
++    Cond(7, 4, X86::COND_E);
++    // The scan proved every skipped prefix slice contributes zero. Start the
++    // controller at the first nonempty query slice instead of processing that
++    // prefix again. RDI/RDX/RCX retain the original context/end/output values.
++    Blocks[8].second.push_back(MCInstBuilder(X86::MOV64rr)
++        .addReg(X86::RSI).addReg(X86::R11));
++    auto RuntimeCode = createCMOVRuntimeEntry(Original, Branch, Runtime, Ctx);
++    Blocks[8].second.insert(Blocks[8].second.end(), RuntimeCode.begin(), RuntimeCode.end());
++    Blocks[4].second.push_back(MCInstBuilder(X86::TEST64rr).addReg(X86::RCX).addReg(X86::RCX));
++    Cond(4, 6, X86::COND_E);
++    Blocks[5].second.push_back(MCInstBuilder(X86::XORPSrr)
++        .addReg(X86::XMM0).addReg(X86::XMM0).addReg(X86::XMM0));
++    // Cooperative v1 Counters is 64 bytes; short_bypass is at byte 56.
++    // Fast completion consumes no A/B batches and performs no clock reads.
++    for (int64_t Offset : {0, 16, 32, 48})
++      Blocks[5].second.push_back(MCInstBuilder(X86::MOVUPSmr).addReg(X86::RCX)
++          .addImm(1).addReg(0).addImm(Offset).addReg(0).addReg(X86::XMM0));
++    Blocks[5].second.push_back(MCInstBuilder(X86::MOV32mi).addReg(X86::RCX)
++        .addImm(1).addReg(0).addImm(56).addReg(0).addImm(1));
++    Blocks[6].second.push_back(MCInstBuilder(X86::XOR32rr)
++        .addReg(X86::EAX).addReg(X86::EAX).addReg(X86::EAX));
++    Blocks[6].second.push_back(MCInstBuilder(X86::RET64));
++    Plan.Edges = {{0, 4}, {0, 1}, {1, 2}, {2, 7}, {2, 3}, {3, 2},
++                  {3, 4}, {4, 6}, {4, 5}, {5, 6}, {7, 4}, {7, 8}};
++    return Plan;
++  }
++
    using MCPlusBuilder::MCPlusBuilder;
  
    std::unique_ptr<MCSymbolizer>
-@@ -1812,6 +1830,27 @@ public:
+@@ -1812,6 +1934,27 @@ public:
      return true;
    }
  
@@ -847,10 +1026,10 @@ index 000000000..7c6077348
 +}
 diff --git a/bolt/runtime/cmov.h b/bolt/runtime/cmov.h
 new file mode 100644
-index 000000000..53088daa7
+index 000000000..ae444a02c
 --- /dev/null
 +++ b/bolt/runtime/cmov.h
-@@ -0,0 +1,24 @@
+@@ -0,0 +1,30 @@
 +// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 +// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 +#pragma once
@@ -861,6 +1040,9 @@ index 000000000..53088daa7
 +// Kernel: checksum(ctx, queries_begin, queries_end), preserving input order.
 +// Entry: checksum(ctx, slices_begin, slices_end, optional_counters).
 +// Kernels must not throw; all ranges must be valid as in the original driver.
++// The driver sums kernel results without other per-batch side effects. Context
++// and query storage are immutable during a call and do not overlap Counters.
++// BOLT may fold a proved side-effect-free zero-work prefix at the batch entry.
 +namespace bolt_cmov {
 +struct Slice { const uint64_t *begin; const uint64_t *end; };
 +struct Counters {
@@ -868,6 +1050,9 @@ index 000000000..53088daa7
 +  uint64_t fallback_batches, suspicion_controls;
 +  unsigned entered, rejection, short_bypass;
 +};
++// BOLT's lifted zero-work return writes this v1 layout directly.
++static_assert(sizeof(Counters) == 64 && offsetof(Counters, short_bypass) == 56,
++              "update the x86 zero-work entry when changing the v1 ABI");
 +using Kernel = uint64_t (*)(const void *, const uint64_t *, const uint64_t *);
 +constexpr size_t MinimumBatches = 512, RequiredQueries = 4096;
 +extern "C" uint64_t __bolt_cmov_observe_v1(

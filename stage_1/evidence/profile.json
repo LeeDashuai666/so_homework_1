@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "binary_sha256": "129db08dc0d7c7f603fc6b0f5e8421386d8116f7b26b074beadb893484abd7c0",
+  "host_cpu": "znver3",
+  "sites": [
+    {
+      "condition": 3,
+      "end_offset": 83,
+      "estimated_bytes": 8,
+      "false_offset": 83,
+      "function": "cmov_kernel_v1",
+      "group_size": 2,
+      "loop_depth": 2,
+      "offset": 75,
+      "old_bytes": 8,
+      "true_offset": 75,
+      "true_count": 1657160,
+      "false_count": 40196,
+      "validated": true,
+      "validation_speedup_lower": 1.4277800001370606
+    }
+  ],
+  "validation": {
+    "approved": true,
+    "independent_from_training": true,
+    "cases": [
+      {
+        "size": 4096,
+        "seed": 83,
+        "median_speedup": 1.4424572889564533,
+        "ci95": {
+          "low": 1.4277800001370606,
+          "high": 1.482768873916114,
+          "order_index": 2,
+          "confidence_at_least": 0.95
+        }
+      },
+      {
+        "size": 8192,
+        "seed": 1009,
+        "median_speedup": 1.6103808058580595,
+        "ci95": {
+          "low": 1.5053327647415065,
+          "high": 1.7933422069035898,
+          "order_index": 2,
+          "confidence_at_least": 0.95
+        }
+      }
+    ]
+  }
+}

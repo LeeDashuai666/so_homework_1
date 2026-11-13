@@ -21,6 +21,8 @@ CASES = ['low95','high95','low80','uniform','sorted','shift','long-recovery',
 SHORT = {'short-uniform1':1,'short-uniform4':4,'short-uniform16':16,
          'short-low95':16,'short-uniform63':63,'threshold64':64,'threshold65':65,
          'fast-shift':256,'fast-shift1':64,'threshold511':511}
+BOUNDARIES = [(0,'low95',8192),(0,'uniform',8192),(0,'short-uniform1',8192),
+              (1,'low95',8),(1,'uniform',4),(1,'short-uniform1',512),(64,'low95',4)]
 
 
 def analyze(out):
@@ -29,6 +31,8 @@ def analyze(out):
     results=[]
     for size in protocol['sizes']:
         for case in protocol['cases']:
+            if protocol.get('cells') and not any(c['size']==size and c['case']==case for c in protocol['cells']):
+                continue
             row={'size':size,'case':case}
             for kind in ('pair','null'):
                 data=[r for r in records if (r['size'],r['case'],r['kind'])==(size,case,kind)]
@@ -39,7 +43,7 @@ def analyze(out):
             ratio=row['pair']['median_speedup']
             row['median_runtime_increase_percent']=(1/ratio-1)*100
             row['median_within_one_percent_reference']=ratio>=1/1.01
-            row['positive_target']=case=='low95'
+            row['positive_target']=case=='low95' and size in (4096,8192)
             row['positive_ci_lower_at_least_two_percent']=row['pair']['ci95']['low']>=1.02
             on=[x for r in records if (r['size'],r['case'],r['kind'])==(size,case,'pair')
                 for x in r['runs'] if x['variant']=='on']
@@ -70,9 +74,14 @@ def main():
     p.add_argument('--sizes',type=int,nargs='+',default=[4096,8192])
     p.add_argument('--cases',nargs='+',choices=CASES,default=CASES)
     p.add_argument('--analyze-only',action='store_true')
+    p.add_argument('--boundary-suite',action='store_true',help='measure the seven zero/small-work boundary cells')
+    p.add_argument('--calls-per-measurement',type=int,
+                   help='aggregate 1..8192 independent calls; useful for zero-work paths')
     args=p.parse_args();out=args.output.resolve()
     if args.analyze_only:analyze(out);return
     if args.blocks<3:p.error('at least three blocks')
+    if args.calls_per_measurement is not None and not 1<=args.calls_per_measurement<=8192:
+        p.error('calls per measurement must be 1..8192')
     build=args.build.resolve();meta=json.loads((build/'build.json').read_text())
     if not meta['injected']:raise RuntimeError('no runtime was injected; do not claim a protected benchmark')
     bins={v:build/v for v in ('off','on')}
@@ -89,15 +98,23 @@ def main():
               'source_sha256':sha(Path(__file__)),
               'warmup':'one complete same-mode call per process, excluded symmetrically',
               'minimum_batches':512,'queries_per_batch':4096,'once_per_call_attempt':True}
+    protocol['calls_per_measurement_override']=args.calls_per_measurement
+    if args.boundary_suite:
+        protocol['sizes']=list(dict.fromkeys(n for n,c,k in BOUNDARIES))
+        protocol['cases']=list(dict.fromkeys(c for n,c,k in BOUNDARIES))
+        protocol['cells']=[{'size':n,'case':c,'repeats':k} for n,c,k in BOUNDARIES]
     write(out/'protocol.json',protocol)
     rng=random.Random(args.seed^0x1ea49)
     def execute(binary,case,size,seed):
-        repeats=math.ceil(512/SHORT[case]) if case in SHORT else 1
+        repeats=args.calls_per_measurement or (math.ceil(512/SHORT[case]) if case in SHORT else 1)
+        if args.boundary_suite and not args.calls_per_measurement:
+            repeats=next(k for n,c,k in BOUNDARIES if n==size and c==case)
         result=subprocess.run([str(binary),'guarded',case,str(size),str(seed),str(repeats)],capture_output=True,text=True,timeout=120)
         if result.returncode:raise RuntimeError(result.stderr[-2000:])
         return json.loads(result.stdout)
     for block in range(args.blocks):
-        cells=[(n,c) for n in args.sizes for c in args.cases];rng.shuffle(cells)
+        cells=[(c['size'],c['case']) for c in protocol['cells']] if args.boundary_suite else [(n,c) for n in args.sizes for c in args.cases]
+        rng.shuffle(cells)
         for size,case in cells:
             kinds=['pair','null'];rng.shuffle(kinds)
             for kind in kinds:
@@ -110,6 +127,8 @@ def main():
                     if variant=='off' and (run['clock_reads'] or run['active_batches'] or run['entered']):
                         raise RuntimeError('flag-off contains controller activity')
                     if variant=='on':
+                        if size==0 and (run['clock_reads'] or run['trial_batches'] or run['active_batches']):
+                            raise RuntimeError('zero work entered the controller')
                         if run['trial_batches']>3*data['repeats']:raise RuntimeError('repeated admission')
                         if data['batches']<512 and (run['clock_reads'] or run['active_batches'] or run['short_bypass']!=data['repeats']):
                             raise RuntimeError('short bypass did not avoid clocks/branch trials')

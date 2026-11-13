@@ -1,7 +1,7 @@
 {
-  "image": "so-homework-1:runtime-b711b4c819590ce8",
-  "code_fingerprint": "b711b4c819590ce8",
-  "image_id": "sha256:6eb3628116f71b32690386874ba3c2906e9c83d7a833934a58a9518d23c33682",
+  "image": "so-homework-1:runtime-b6201a99e79e751a",
+  "code_fingerprint": "b6201a99e79e751a",
+  "image_id": "sha256:dfc93bad5485499ad7c4d38132e0df9aa90975de1a6698fd2aaf7d076b4193f8",
   "rootfs_layers": [
     "sha256:bec87777bc2fb2edcdf9af11df1531469e7df911309c1413082b18fcb8610278",
     "sha256:67657442a76a207cae4fe141d17aa55253c076a23993f445827a74c164b8073f",
@@ -13,7 +13,13 @@
     "sha256:15b17c1c0ba90462988624c7f1b10d360f85d728d0d65882c1710a2cbba51a57",
     "sha256:8659b1c989a445d814b1e00223f094ca32f72e337278256f91a7d0d86fe74928",
     "sha256:d074c769abe480180b79a264aa7ae8c0d801efc31aaccf13267002aaa4ac32b8",
-    "sha256:49a7b039db3fc643452e06986228b5298760c52a7f899927e580ddb11d9d03a3"
+    "sha256:49a7b039db3fc643452e06986228b5298760c52a7f899927e580ddb11d9d03a3",
+    "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+    "sha256:a085a732c46e43734072479a8ef5279cb58f71ee8f86dcd7a1c1cd8a9951bb59",
+    "sha256:42ebd105495032abe594cad6dad48dde78f7fa97760fc049f7372c628f4a19e1",
+    "sha256:81c7716390680d15a8d56927ef7982f7640d3293b2b587ac9b15ac3baa066fad",
+    "sha256:845f35db425d37936dca1cbf7be3c937758d77a029e86ce6fad21ba00b1e664f",
+    "sha256:a817a37815948c0a397cd8bcffcf63f4184eeea84205b21314860f43bcd81ea3"
   ],
   "entrypoint": [
     "python3",
@@ -24,7 +30,7 @@
     "--output",
     "/results/run"
   ],
-  "download_url": "https://github.com/LeeDashuai666/so_homework_1/releases/download/runtime-v2-20261112/so_homework_1-runtime-v2-linux_amd64.docker.tar.gz",
-  "archive_sha256": "3ea70ef25ec5a962ea52f8d472d8ffef4199644d7b239945bd3b0ec1c17e3398",
-  "archive_bytes": 268670652
+  "download_url": "https://github.com/LeeDashuai666/so_homework_1/releases/download/runtime-v3-20261113/so_homework_1-runtime-v3-linux_amd64.docker.tar.gz",
+  "archive_sha256": "994d16537d2761e11f39ff4feb2cc3095a1a7263c97a37a74b87610516fb4718",
+  "archive_bytes": 292486882
 }

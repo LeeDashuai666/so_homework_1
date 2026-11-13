@@ -21,6 +21,7 @@ def main():
     args=p.parse_args()
     if args.output.exists(): p.error('output already exists')
     args.output.parent.mkdir(parents=True,exist_ok=True)
+    injected=json.loads((args.build/'build.json').read_text())['injected']
     records=[]
     for n in (4096,8192):
         for case in CASES:
@@ -32,13 +33,14 @@ def main():
                     data=json.loads(r.stdout); row=data['runs'][0]
                     if expected is None: expected=row['checksum']
                     if row['checksum']!=expected: raise RuntimeError('cross-mode checksum mismatch')
-                    if mode=='on':
+                    if mode=='on' and injected:
                         if row['trial_batches']>3: raise RuntimeError('multiple admissions')
                         if data['batches']<512 and (not row['short_bypass'] or row['clock_reads'] or row['trial_batches'] or row['active_batches']):
                             raise RuntimeError('short bypass has speculative work')
                     records.append({'size':n,'case':case,'seed':seed,'variant':mode,**data})
             print(f'{n} {case} passed',flush=True)
     result={'functional_only':True,'performance_acceptance_claimed':False,
+            'runtime_injected':injected,
             'binary_sha256':{n:hashlib.sha256((args.build/n).read_bytes()).hexdigest() for n in ('input','off','on')},
             'allowed_cpus':sorted(os.sched_getaffinity(0)), 'records_passed':len(records),'records':records}
     args.output.write_text(json.dumps(result,indent=2)+'\n')

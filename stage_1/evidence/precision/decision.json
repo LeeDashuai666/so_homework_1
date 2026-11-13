@@ -1,0 +1,11 @@
+{
+  "cells": 4,
+  "measured_executions": 992,
+  "all_outputs_passed": true,
+  "regular_cells": 4,
+  "regular_medians_within_one_percent": 4,
+  "worst_regular_median_time_increase_percent": 0.20532547652094557,
+  "boundary_cells": 0,
+  "boundary_medians_within_one_percent": 0,
+  "universal_future_input_bound_proven": false
+}

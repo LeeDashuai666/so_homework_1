@@ -1,0 +1,292 @@
+{
+  "source_baseline": "3bd152ddbb6df45e0e07d6c9e9eb1573dcfd3dc6",
+  "zero_work": {
+    "checks": [
+      {
+        "name": "actual lifted ELF, full/empty/mixed queries, null/guard-page unused contexts, null counters",
+        "cases": 344,
+        "digest": 63612247716
+      },
+      {
+        "name": "standard",
+        "lifted": true,
+        "result": "0 11",
+        "passed": true
+      },
+      {
+        "name": "offset-context",
+        "lifted": true,
+        "result": "0 11",
+        "passed": true
+      },
+      {
+        "name": "nonzero-return",
+        "lifted": false,
+        "result": "7 11",
+        "passed": true
+      },
+      {
+        "name": "different-predicate",
+        "lifted": false,
+        "result": "0 11",
+        "passed": true
+      }
+    ],
+    "bolt_sha256": "fcad2fc6e67e893667e79c219a0fc248a08728691181fe67345a5ef956775496",
+    "performance_claimed": false
+  },
+  "integration": {
+    "checks": [
+      {
+        "name": "vanilla",
+        "passed": true,
+        "returncode": 0
+      },
+      {
+        "name": "default-off",
+        "passed": true,
+        "returncode": 0
+      },
+      {
+        "name": "default-off executable sections addresses sizes identical to vanilla",
+        "passed": true
+      },
+      {
+        "name": "empty",
+        "passed": true,
+        "returncode": 0
+      },
+      {
+        "name": "empty executable identity",
+        "passed": true
+      },
+      {
+        "name": "unvalidated",
+        "passed": true,
+        "returncode": 0
+      },
+      {
+        "name": "unvalidated executable identity",
+        "passed": true
+      },
+      {
+        "name": "insufficient-gain",
+        "passed": true,
+        "returncode": 0
+      },
+      {
+        "name": "insufficient-gain executable identity",
+        "passed": true
+      },
+      {
+        "name": "unbiased",
+        "passed": true,
+        "returncode": 0
+      },
+      {
+        "name": "unbiased executable identity",
+        "passed": true
+      },
+      {
+        "name": "too-few",
+        "passed": true,
+        "returncode": 0
+      },
+      {
+        "name": "too-few executable identity",
+        "passed": true
+      },
+      {
+        "name": "wrong-group-size",
+        "passed": true,
+        "returncode": 0
+      },
+      {
+        "name": "wrong-group-size executable identity",
+        "passed": true
+      },
+      {
+        "name": "wrong-hash",
+        "passed": true,
+        "returncode": 1
+      },
+      {
+        "name": "wrong-cpu",
+        "passed": true,
+        "returncode": 1
+      },
+      {
+        "name": "negative-count",
+        "passed": true,
+        "returncode": 1
+      },
+      {
+        "name": "duplicate",
+        "passed": true,
+        "returncode": 1
+      },
+      {
+        "name": "missing-entry",
+        "passed": true,
+        "returncode": 0
+      },
+      {
+        "name": "missing-entry executable identity",
+        "passed": true
+      },
+      {
+        "name": "missing-kernel",
+        "passed": true,
+        "returncode": 0
+      },
+      {
+        "name": "missing-kernel executable identity",
+        "passed": true
+      },
+      {
+        "name": "wrong-forward-target",
+        "passed": true,
+        "returncode": 0
+      },
+      {
+        "name": "wrong-forward-target executable identity",
+        "passed": true
+      },
+      {
+        "name": "missing-profile",
+        "passed": true,
+        "returncode": 1
+      },
+      {
+        "name": "conflict-static",
+        "passed": true,
+        "returncode": 1
+      },
+      {
+        "name": "conflict-candidate",
+        "passed": true,
+        "returncode": 1
+      },
+      {
+        "name": "conflict-instrument",
+        "passed": true,
+        "returncode": 1
+      },
+      {
+        "name": "ELF entry remains application _start",
+        "passed": true
+      },
+      {
+        "name": "exact symbol-sized CMOV counts and clone unwind FDE",
+        "passed": true
+      },
+      {
+        "name": "runtime and thunk relocations resolved",
+        "passed": true
+      }
+    ],
+    "checks_passed": 32,
+    "bolt_sha256": "fcad2fc6e67e893667e79c219a0fc248a08728691181fe67345a5ef956775496",
+    "on_sha256": "195029f27c74682e6da77b63096ab8887f44c2a260fb3cb38322b70d7c6500a5",
+    "performance_claimed": false
+  },
+  "functional_records": 468,
+  "calibration_rejected_functional_records": 156,
+  "runtime_sanitizer_tests": 28,
+  "bolt_regression_tests": 755,
+  "docker_smoke": {
+    "mode": "smoke",
+    "checks": [
+      {
+        "name": "controller-safety",
+        "returncode": 0
+      },
+      {
+        "name": "static-semantics",
+        "returncode": 0
+      },
+      {
+        "name": "build-and-calibrate",
+        "returncode": 0
+      },
+      {
+        "name": "flag-rejections-code-audit",
+        "returncode": 0
+      },
+      {
+        "name": "zero-work-functional",
+        "returncode": 0
+      },
+      {
+        "name": "actual-elf-functional",
+        "returncode": 0
+      },
+      {
+        "name": "final-elf-performance",
+        "returncode": 0
+      },
+      {
+        "name": "zero-work-performance",
+        "returncode": 0
+      }
+    ],
+    "runtime_injected": true,
+    "adaptive_bolt_integration_completed": true,
+    "performance_acceptance_claimed": false,
+    "note": "Read performance/decision.json and uncertainty. Successful execution is not a universal performance guarantee."
+  },
+  "root_evidence_replay_byte_exact": true,
+  "release_docker_smoke": {
+    "mode": "smoke",
+    "checks": [
+      {
+        "name": "controller-safety",
+        "returncode": 0
+      },
+      {
+        "name": "static-semantics",
+        "returncode": 0
+      },
+      {
+        "name": "build-and-calibrate",
+        "returncode": 0
+      },
+      {
+        "name": "flag-rejections-code-audit",
+        "returncode": 0
+      },
+      {
+        "name": "zero-work-functional",
+        "returncode": 0
+      },
+      {
+        "name": "actual-elf-functional",
+        "returncode": 0
+      },
+      {
+        "name": "final-elf-performance",
+        "returncode": 0
+      },
+      {
+        "name": "zero-work-performance",
+        "returncode": 0
+      }
+    ],
+    "runtime_injected": true,
+    "adaptive_bolt_integration_completed": true,
+    "performance_acceptance_claimed": false,
+    "note": "Read performance/decision.json and uncertainty. Successful execution is not a universal performance guarantee."
+  },
+  "release_boundary_suite": {
+    "integrated_bolt_runtime": true,
+    "separate_flag_off_on_elfs": true,
+    "cells": 7,
+    "measured_executions": 392,
+    "all_measured_outputs_passed": true,
+    "median_within_one_percent_reference": 7,
+    "positive_targets_with_ci_at_least_two_percent": 0,
+    "worst_median_runtime_increase_percent": 0.8562607243326914,
+    "universal_future_input_bound_proven": false,
+    "teacher_reference_is_approximate_not_all_simultaneous_ci_gate": true
+  }
+}

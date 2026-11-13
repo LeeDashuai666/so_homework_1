@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     const std::string mode = argv[1], name = argv[2];
     const unsigned n = std::stoul(argv[3]), repeats = std::stoul(argv[5]);
     const std::uint64_t seed = std::stoull(argv[4]);
-    if (!n || n > 1u<<22 || !repeats || repeats > 8192) throw std::runtime_error("invalid size/repeats");
+    if (n > 1u<<22 || !repeats || repeats > 8192) throw std::runtime_error("invalid size/repeats");
     std::vector<Phase> phases;
     if (name == "low95" || name == "train") phases = {{95, 512}};
     else if (name == "high95") phases = {{95, 512, true}};
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
         for (unsigned i=0; i<BatchSize; ++i) {
           unsigned hot = p.shape==1 ? (i<512 ? 95 : 0) : p.shape==2 ? (i>=3072 ? 95 : 0)
                        : p.shape==3 ? ((i/64)%2 ? 0 : 95) : p.hot;
-          q[i] = rng()%100 < hot ? (p.high ? 2*n : 0) : rng()%(2*n);
+          q[i] = rng()%100 < hot ? (p.high ? 2*n : 0) : (n ? rng()%(2*n) : 0);
           sums[k] += std::lower_bound(values.begin(), values.end(), q[i])-values.begin();
         }
         if (p.sorted) std::sort(q.begin(), q.end());

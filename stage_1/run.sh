@@ -41,6 +41,23 @@ print(h.hexdigest()[:16])
 PY
 )"
 hw_image="so-homework-1:runtime-$hw_fingerprint"
+hw_local_archive="$hw_root/../so_homework_1-runtime-v3-linux_amd64.docker.tar.gz"
+if [[ ! -f "$hw_local_archive" ]]; then
+  hw_local_archive="$hw_root/../../so_homework_1-runtime-v3-linux_amd64.docker.tar.gz"
+fi
+if [[ "$hw_source" == 0 ]] && ! docker image inspect "$hw_image" >/dev/null 2>&1 && [[ -f "$hw_local_archive" ]]; then
+  python3 - "$hw_root" "$hw_fingerprint" "$hw_local_archive" <<'PY'
+from pathlib import Path
+import hashlib,json,subprocess,sys
+root=Path(sys.argv[1]);meta=json.loads((root/'evidence/local-image-build.json').read_text())
+if meta['fingerprint']!=sys.argv[2]:raise SystemExit('Local image source fingerprint mismatch')
+archive=Path(sys.argv[3]);digest=hashlib.sha256()
+with archive.open('rb') as f:
+    for part in iter(lambda:f.read(1024*1024),b''):digest.update(part)
+if digest.hexdigest()!=meta['archive_sha256']:raise SystemExit('Local Docker archive SHA256 mismatch')
+subprocess.run(['docker','load','-i',str(archive)],check=True)
+PY
+fi
 if [[ "$hw_source" == 0 ]] && ! docker image inspect "$hw_image" >/dev/null 2>&1 && [[ -f "$hw_root/image.json" ]]; then
   python3 "$hw_root/scripts/fetch_image.py" --metadata "$hw_root/image.json" \
     --fingerprint "$hw_fingerprint" --cache "$hw_root/.build"
