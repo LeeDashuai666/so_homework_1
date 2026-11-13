@@ -1,0 +1,176 @@
+[
+  {
+    "case": "past95",
+    "compute_ns-off/on": {
+      "median": 1.1862289128835417,
+      "ci95": {
+        "low": 1.0594435720302902,
+        "high": 1.3006795672499205,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "compute_ns-off/null": {
+      "median": 0.9935756802255499,
+      "ci95": {
+        "low": 0.9762682495501026,
+        "high": 1.0245530282523876,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "application_ns-off/on": {
+      "median": 1.0207819993792135,
+      "ci95": {
+        "low": 1.007564650855733,
+        "high": 1.0448741168336886,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "application_ns-off/null": {
+      "median": 1.0004592738818128,
+      "ci95": {
+        "low": 0.9865181711378069,
+        "high": 1.011861956867739,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "process_ns-off/on": {
+      "median": 1.0203259528317732,
+      "ci95": {
+        "low": 1.004909324440005,
+        "high": 1.0417446058694744,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "process_ns-off/null": {
+      "median": 1.0002870385511833,
+      "ci95": {
+        "low": 0.9873675993772061,
+        "high": 1.013855056778056,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "entered_calls": 15
+  },
+  {
+    "case": "uniform",
+    "compute_ns-off/on": {
+      "median": 0.9974397495913575,
+      "ci95": {
+        "low": 0.9681172048669799,
+        "high": 1.026369046412703,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "compute_ns-off/null": {
+      "median": 0.9883722337547806,
+      "ci95": {
+        "low": 0.9715987181087724,
+        "high": 1.0223726224285614,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "application_ns-off/on": {
+      "median": 1.00232751261821,
+      "ci95": {
+        "low": 0.9915828961501221,
+        "high": 1.0148166098118305,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "application_ns-off/null": {
+      "median": 0.9999183035051267,
+      "ci95": {
+        "low": 0.9908465408214708,
+        "high": 1.0074376539511505,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "process_ns-off/on": {
+      "median": 0.9998877024454613,
+      "ci95": {
+        "low": 0.9899211993460515,
+        "high": 1.015969768964224,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "process_ns-off/null": {
+      "median": 0.9994575304109188,
+      "ci95": {
+        "low": 0.989573573373357,
+        "high": 1.0060739772998926,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "entered_calls": 0
+  },
+  {
+    "case": "shift",
+    "compute_ns-off/on": {
+      "median": 1.1713903412420439,
+      "ci95": {
+        "low": 1.1686440884756129,
+        "high": 1.1970297428653383,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "compute_ns-off/null": {
+      "median": 1.0119689754164338,
+      "ci95": {
+        "low": 0.9865523820804165,
+        "high": 1.0188577801096703,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "application_ns-off/on": {
+      "median": 1.0303441213864903,
+      "ci95": {
+        "low": 1.0187711689207315,
+        "high": 1.036770805199691,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "application_ns-off/null": {
+      "median": 1.0068662567623359,
+      "ci95": {
+        "low": 0.997080713981167,
+        "high": 1.0158968578847396,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "process_ns-off/on": {
+      "median": 1.0292101443759152,
+      "ci95": {
+        "low": 1.019107062408999,
+        "high": 1.0346849723503264,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "process_ns-off/null": {
+      "median": 1.0053410047964377,
+      "ci95": {
+        "low": 0.9978576633273647,
+        "high": 1.0186058159180151,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "entered_calls": 18
+  }
+]

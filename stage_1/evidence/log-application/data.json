@@ -1,0 +1,46 @@
+{
+  "source": "https://github.com/logpai/loghub",
+  "dataset": "Linux/Linux_2k.log_structured.csv",
+  "repository_commit": "dd61d0952749ee7963bde24220d1be5ede023033",
+  "csv_sha256": "53bbb9b226f4e036112cef575f399bfca6103bd6c2be0ba6b75b27d8b116b652",
+  "rows": 2000,
+  "timestamp_normalization": "CSV has no year; assign year 2000 UTC consistently, retain month/day/time and all rows.",
+  "query_scope": "Synthetic workload queries; 95% outside retained range, uniform, or phase change. Not production query traces.",
+  "queries": {
+    "training": {
+      "seed": 123071,
+      "case": "past95",
+      "queries": 65536,
+      "expected": 2807101,
+      "sha256": "773153eda722813c3d3565def4f5bac89206232fae4a563059cea8c566373620"
+    },
+    "calibration": {
+      "seed": 124083,
+      "case": "past95",
+      "queries": 2097152,
+      "expected": 92870826,
+      "sha256": "2e59b60762a8cc2d7804c88c146ce5760b927ca09b9fd83adc4aca8c2feafdf9"
+    },
+    "test-past95": {
+      "seed": 125049,
+      "case": "past95",
+      "queries": 2097152,
+      "expected": 93660021,
+      "sha256": "e618613af108eff63e4db0b3d29db9f694e0e7fadcc46bd3299741fc904bc861"
+    },
+    "test-uniform": {
+      "seed": 125049,
+      "case": "uniform",
+      "queries": 2097152,
+      "expected": 1871901482,
+      "sha256": "3681c7e6acf244914785c4b86ff5856db5c6f284a97e9a9e3c830a70c6af13d3"
+    },
+    "test-shift": {
+      "seed": 125049,
+      "case": "shift",
+      "queries": 2097152,
+      "expected": 936946414,
+      "sha256": "4dfae06496ff2c4a056e4d14070269dbbcda87309576a4fbbddfa4e5f2ea29e3"
+    }
+  }
+}

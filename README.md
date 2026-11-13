@@ -18,6 +18,8 @@
 
 59项负载、31轮正式实验，共14632次计时执行，结果校验全部通过。常规51/52项中位回退低于1%，最差1.10%；7项边界均低于1%。独立长计时中，两项临界场景回退约0.17%和0.21%。完整数据与区间见[实验结果](stage_1/docs/results.md)。
 
+perf已测7项负载、252次计数。另在公开日志数据、合成查询的累计计数原型中，范围前查询的完整进程加速约1.030倍，Docker复现约1.020倍；均匀查询未确认提升。详见[perf与应用实验](stage_1/docs/perf-application.md)及[原型复现说明](stage_1/experiments/log-time-index/README.md)。
+
 ## 一键运行
 
 准备Linux x86-64、Bash、Python3和可用Docker，WSL2可用。

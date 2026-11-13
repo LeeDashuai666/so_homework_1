@@ -1,0 +1,5 @@
+{
+  "reason": "Benchmark JSON variant=guarded overwrote the collector binary label. Restored labels from each recorded executable argv; counters, times and all samples unchanged.",
+  "rows": 63,
+  "original_preserved": "raw-original.jsonl"
+}

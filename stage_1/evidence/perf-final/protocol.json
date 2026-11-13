@@ -1,0 +1,57 @@
+{
+  "blocks": 9,
+  "seed": 122049,
+  "cpu": 2,
+  "kernel": "6.6.87.2-microsoft-standard-WSL2",
+  "perf": "/home/lxy18/system_homework/stage_1/.tools/root/usr/lib/linux-tools-6.8.0-147/perf",
+  "events": [
+    "cycles:u",
+    "instructions:u",
+    "branches:u",
+    "branch-misses:u"
+  ],
+  "sha256": {
+    "off": "af88395c81ab0c590ba17a22ea0065598126ff95800e64d4d2916bc52cf7de53",
+    "on": "195029f27c74682e6da77b63096ab8887f44c2a260fb3cb38322b70d7c6500a5"
+  },
+  "cells": [
+    [
+      4096,
+      "low95",
+      4
+    ],
+    [
+      4096,
+      "uniform",
+      4
+    ],
+    [
+      4096,
+      "shift",
+      4
+    ],
+    [
+      8192,
+      "low95",
+      4
+    ],
+    [
+      8192,
+      "uniform",
+      4
+    ],
+    [
+      8192,
+      "shift",
+      4
+    ],
+    [
+      4096,
+      "short-uniform1",
+      2048
+    ]
+  ],
+  "pmu_scope": "Whole process: includes preparation, reference computation and same-mode warmup plus measured calls. Hardware events are user-only; task-clock and perf elapsed cover process. Not an ROI-only counter measurement.",
+  "time_scope": "JSON elapsed_ns is the existing benchmark timed API scope; unchanged published 31-block experiment remains primary.",
+  "interpretation": "Miss rate alone is insufficient: the transformed code adds branches. Report absolute misses, cycles and instructions; no unique proof of dependency-chain causation."
+}

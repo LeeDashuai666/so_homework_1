@@ -6,3 +6,4 @@
 *.patch text eol=lf whitespace=-blank-at-eol
 *.docx binary
 *.gz binary
+stage_1/experiments/log-time-index/data/* whitespace=-blank-at-eol,-blank-at-eof

@@ -1,0 +1,27 @@
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 794  of event 'cycles:u'
+# Event count (approx.): 3398050639
+#
+# Overhead  Symbol                  IPC   [IPC Coverage]
+# ........  ......................  ....................
+#
+    48.31%  [.] _start              -      -
+    13.69%  [.] 0x0000000000403d0d  -      -
+     9.56%  [.] 0x0000000000403cfc  -      -
+     9.31%  [.] 0x0000000000403d06  -      -
+     5.70%  [.] 0x00000000004000a9  -      -
+     2.59%  [.] 0x0000000000403d16  -      -
+     1.68%  [.] 0x0000000000403d10  -      -
+     1.31%  [.] _start              -      -
+     1.04%  [.] 0x00000000004000b2  -      -
+     1.04%  [.] 0x00000000004000ae  -      -
+     1.04%  [.] 0x0000000000403cf9  -      -
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#

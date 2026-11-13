@@ -1,0 +1,464 @@
+[
+  {
+    "size": 4096,
+    "case": "low95",
+    "repeats": 4,
+    "elapsed_ns": {
+      "off_on_median_ratio": 1.3092601528448466,
+      "ci95": {
+        "low": 1.2221966658355614,
+        "high": 1.4016649993308663,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "cycles:u": {
+      "off_on_median_ratio": 1.3748929024796275,
+      "ci95": {
+        "low": 1.26334662357527,
+        "high": 1.3848297645030514,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "instructions:u": {
+      "off_on_median_ratio": 0.9445791486143519,
+      "ci95": {
+        "low": 0.940774565465362,
+        "high": 0.9512166564383583,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branches:u": {
+      "off_on_median_ratio": 0.5810097931224822,
+      "ci95": {
+        "low": 0.5634640984854,
+        "high": 0.6130051150679877,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branch-misses:u": {
+      "off_on_median_ratio": 0.25648778317458854,
+      "ci95": {
+        "low": 0.24301246214064193,
+        "high": 0.28431026972078133,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "off": {
+      "cycles:u": 1021954702.5,
+      "instructions:u": 2985263651.5,
+      "branches:u": 235077595.5,
+      "branch-misses:u": 857510.0,
+      "miss_percent": 0.3647850530522404,
+      "ipc": 2.9210303503829604
+    },
+    "on": {
+      "cycles:u": 772002344.5,
+      "instructions:u": 3153361810.5,
+      "branches:u": 398182420.0,
+      "branch-misses:u": 3334413.0,
+      "miss_percent": 0.819886794012125,
+      "ipc": 4.084674210124547
+    }
+  },
+  {
+    "size": 4096,
+    "case": "uniform",
+    "repeats": 4,
+    "elapsed_ns": {
+      "off_on_median_ratio": 1.0038092647740573,
+      "ci95": {
+        "low": 0.9868155064670113,
+        "high": 1.0170400741613947,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "cycles:u": {
+      "off_on_median_ratio": 0.9980780408241678,
+      "ci95": {
+        "low": 0.9928341554681668,
+        "high": 1.000044509463507,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "instructions:u": {
+      "off_on_median_ratio": 0.9999760482910619,
+      "ci95": {
+        "low": 0.9999758141100082,
+        "high": 0.9999760962677386,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branches:u": {
+      "off_on_median_ratio": 0.9990447429448295,
+      "ci95": {
+        "low": 0.9990447165789084,
+        "high": 0.9990449391972014,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branch-misses:u": {
+      "off_on_median_ratio": 0.14238459122788652,
+      "ci95": {
+        "low": 0.13104494124828323,
+        "high": 0.1548928135066089,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "off": {
+      "cycles:u": 1784735066.5,
+      "instructions:u": 5547034620.5,
+      "branches:u": 437313245.5,
+      "branch-misses:u": 37651.5,
+      "miss_percent": 0.00860971475436032,
+      "ipc": 3.1080437703955495
+    },
+    "on": {
+      "cycles:u": 1788680216.5,
+      "instructions:u": 5547167218.5,
+      "branches:u": 437731391.5,
+      "branch-misses:u": 262601.0,
+      "miss_percent": 0.059991381599888816,
+      "ipc": 3.101271274844165
+    }
+  },
+  {
+    "size": 4096,
+    "case": "shift",
+    "repeats": 4,
+    "elapsed_ns": {
+      "off_on_median_ratio": 1.0655213311697307,
+      "ci95": {
+        "low": 1.0630278188185174,
+        "high": 1.0769540932918353,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "cycles:u": {
+      "off_on_median_ratio": 1.065631777891033,
+      "ci95": {
+        "low": 1.0588784569213807,
+        "high": 1.068258914419727,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "instructions:u": {
+      "off_on_median_ratio": 0.9844367404043767,
+      "ci95": {
+        "low": 0.983414791869612,
+        "high": 0.9856619243465868,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branches:u": {
+      "off_on_median_ratio": 0.8354277558293791,
+      "ci95": {
+        "low": 0.8265537633983409,
+        "high": 0.846601370796671,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branch-misses:u": {
+      "off_on_median_ratio": 0.37880557153050604,
+      "ci95": {
+        "low": 0.3687683825512769,
+        "high": 0.4063600847115677,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "off": {
+      "cycles:u": 1980244106.5,
+      "instructions:u": 5873310984.5,
+      "branches:u": 462569012.5,
+      "branch-misses:u": 1288566.0,
+      "miss_percent": 0.27856729810092495,
+      "ipc": 2.9658665513327875
+    },
+    "on": {
+      "cycles:u": 1862481033.5,
+      "instructions:u": 5965267074.0,
+      "branches:u": 552838546.5,
+      "branch-misses:u": 3423763.0,
+      "miss_percent": 0.6169099026517197,
+      "ipc": 3.203525817730754
+    }
+  },
+  {
+    "size": 8192,
+    "case": "low95",
+    "repeats": 4,
+    "elapsed_ns": {
+      "off_on_median_ratio": 1.4062704725527975,
+      "ci95": {
+        "low": 1.3643278313199763,
+        "high": 1.5712804058233745,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "cycles:u": {
+      "off_on_median_ratio": 1.444135244103797,
+      "ci95": {
+        "low": 1.3621862548934573,
+        "high": 1.5396884574686467,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "instructions:u": {
+      "off_on_median_ratio": 0.9495132722140175,
+      "ci95": {
+        "low": 0.9414577958402182,
+        "high": 0.9541435170360393,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branches:u": {
+      "off_on_median_ratio": 0.6023852525233105,
+      "ci95": {
+        "low": 0.5646470256553356,
+        "high": 0.6268420571984562,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branch-misses:u": {
+      "off_on_median_ratio": 0.7567458336237969,
+      "ci95": {
+        "low": 0.3711494662920659,
+        "high": 1.1090772945743297,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "off": {
+      "cycles:u": 1219293576.5,
+      "instructions:u": 3203805799.5,
+      "branches:u": 251888720.5,
+      "branch-misses:u": 2233676.5,
+      "miss_percent": 0.8867895833298165,
+      "ipc": 2.6276821155762833
+    },
+    "on": {
+      "cycles:u": 842532125.0,
+      "instructions:u": 3390834317.0,
+      "branches:u": 433803656.5,
+      "branch-misses:u": 3615009.5,
+      "miss_percent": 0.8293096448398685,
+      "ipc": 4.02626847495365
+    }
+  },
+  {
+    "size": 8192,
+    "case": "uniform",
+    "repeats": 4,
+    "elapsed_ns": {
+      "off_on_median_ratio": 0.9989051803201341,
+      "ci95": {
+        "low": 0.9902154093987799,
+        "high": 1.0032419708795757,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "cycles:u": {
+      "off_on_median_ratio": 0.9976175253168792,
+      "ci95": {
+        "low": 0.9949323136010678,
+        "high": 1.000929288436399,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "instructions:u": {
+      "off_on_median_ratio": 0.999977751266929,
+      "ci95": {
+        "low": 0.999977739116162,
+        "high": 0.999977947942454,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branches:u": {
+      "off_on_median_ratio": 0.9990434509626283,
+      "ci95": {
+        "low": 0.9990433330996012,
+        "high": 0.9990435014650281,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branch-misses:u": {
+      "off_on_median_ratio": 0.12096444262615842,
+      "ci95": {
+        "low": 0.11129590579559824,
+        "high": 0.12702117225344609,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "off": {
+      "cycles:u": 2556112059.5,
+      "instructions:u": 5983640728.5,
+      "branches:u": 470898645.5,
+      "branch-misses:u": 33863.0,
+      "miss_percent": 0.007191143759745438,
+      "ipc": 2.340924118347603
+    },
+    "on": {
+      "cycles:u": 2559485389.5,
+      "instructions:u": 5983772703.5,
+      "branches:u": 471349534.5,
+      "branch-misses:u": 279044.0,
+      "miss_percent": 0.05920107681653508,
+      "ipc": 2.3378738895024016
+    }
+  },
+  {
+    "size": 8192,
+    "case": "shift",
+    "repeats": 4,
+    "elapsed_ns": {
+      "off_on_median_ratio": 1.2094828263735646,
+      "ci95": {
+        "low": 1.1288451924544902,
+        "high": 1.327371908397655,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "cycles:u": {
+      "off_on_median_ratio": 1.2304610793452235,
+      "ci95": {
+        "low": 1.1346850170994933,
+        "high": 1.2852202912414659,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "instructions:u": {
+      "off_on_median_ratio": 0.9861460631628884,
+      "ci95": {
+        "low": 0.9853543086314853,
+        "high": 0.986854492175098,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branches:u": {
+      "off_on_median_ratio": 0.8501201192440662,
+      "ci95": {
+        "low": 0.8427101235287248,
+        "high": 0.856855248144864,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branch-misses:u": {
+      "off_on_median_ratio": 1.8751809955612828,
+      "ci95": {
+        "low": 1.2124584514969896,
+        "high": 2.627122440606282,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "off": {
+      "cycles:u": 2725528347.5,
+      "instructions:u": 6310794986.5,
+      "branches:u": 496221820.5,
+      "branch-misses:u": 6900468.5,
+      "miss_percent": 1.3906001635208995,
+      "ipc": 2.3154446320094744
+    },
+    "on": {
+      "cycles:u": 2224671215.5,
+      "instructions:u": 6395476760.0,
+      "branches:u": 579672220.0,
+      "branch-misses:u": 3430797.0,
+      "miss_percent": 0.5919337903270457,
+      "ipc": 2.8758545403903453
+    }
+  },
+  {
+    "size": 4096,
+    "case": "short-uniform1",
+    "repeats": 2048,
+    "elapsed_ns": {
+      "off_on_median_ratio": 0.9997249659836771,
+      "ci95": {
+        "low": 0.9947598404724192,
+        "high": 1.0039115061207255,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "cycles:u": {
+      "off_on_median_ratio": 0.998817331731027,
+      "ci95": {
+        "low": 0.9963831139229319,
+        "high": 1.0024551503391261,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "instructions:u": {
+      "off_on_median_ratio": 0.9999307048328736,
+      "ci95": {
+        "low": 0.9999306967099123,
+        "high": 0.9999307326998392,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branches:u": {
+      "off_on_median_ratio": 0.9998692331099668,
+      "ci95": {
+        "low": 0.9998691847165466,
+        "high": 0.9998693125948769,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "branch-misses:u": {
+      "off_on_median_ratio": 0.9806930799032514,
+      "ci95": {
+        "low": 0.9533824978035729,
+        "high": 1.0450199704374628,
+        "order_index": 2,
+        "confidence_at_least": 0.95
+      }
+    },
+    "off": {
+      "cycles:u": 894572084.0,
+      "instructions:u": 2778942406.5,
+      "branches:u": 219212052.5,
+      "branch-misses:u": 22908.5,
+      "miss_percent": 0.010450383426126017,
+      "ipc": 3.1065380576879016
+    },
+    "on": {
+      "cycles:u": 895644687.5,
+      "instructions:u": 2779134897.0,
+      "branches:u": 219240711.0,
+      "branch-misses:u": 23359.5,
+      "miss_percent": 0.010654727325617513,
+      "ipc": 3.1030327922681673
+    }
+  }
+]

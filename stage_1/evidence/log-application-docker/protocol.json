@@ -1,0 +1,22 @@
+{
+  "scope": "public-data log cumulative-count business prototype; synthetic requests; full process and batch kernel reported separately",
+  "bolt_sha256": "fcad2fc6e67e893667e79c219a0fc248a08728691181fe67345a5ef956775496",
+  "input_sha256": "50ea2ca0b051ea6a38ed19f561b5270279622f456dfa36290f7d35be056f35ab",
+  "off_sha256": "485e937c4104573dfbf79d433882f01c24f5d7c2e97c02307cec561520e6ee00",
+  "on_sha256": "c445ef9536257e538a09b54e63b811ada6fc1d219821d91f995b69ea8459119d",
+  "independent_training_calibration_test": true,
+  "approved": true,
+  "injected": true,
+  "common_options": [
+    "-reorder-blocks=ext-tsp",
+    "-reorder-functions=cdsort",
+    "-frame-opt=all",
+    "-reg-reassign",
+    "-peepholes=all",
+    "-inline-small-functions",
+    "-cmov-conversion",
+    "-verify-cfg"
+  ],
+  "cpu": 2,
+  "blocks": 9
+}

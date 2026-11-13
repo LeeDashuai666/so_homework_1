@@ -1,0 +1,343 @@
+{
+  "required_checks_passed": true,
+  "perf_stat_runs": 140,
+  "checks": [
+    {
+      "check": "valid_grouped_counters",
+      "passed": true,
+      "detail": {
+        "minimum_running_percent": 100.0
+      }
+    },
+    {
+      "check": "known_instruction_and_branch_slopes",
+      "passed": true,
+      "detail": [
+        {
+          "mode": "count",
+          "low_n": 100000000,
+          "high_n": 200000000,
+          "instructions_per_extra_iteration": 2.99999996,
+          "branches_per_extra_iteration": 1.00000029,
+          "cycles_ratio": 1.9900341240370099
+        },
+        {
+          "mode": "count",
+          "low_n": 200000000,
+          "high_n": 400000000,
+          "instructions_per_extra_iteration": 3.000000545,
+          "branches_per_extra_iteration": 1.00000049,
+          "cycles_ratio": 1.9958570568242655
+        },
+        {
+          "mode": "padded",
+          "low_n": 100000000,
+          "high_n": 200000000,
+          "instructions_per_extra_iteration": 11.00000099,
+          "branches_per_extra_iteration": 1.00000077,
+          "cycles_ratio": 2.001985722464314
+        },
+        {
+          "mode": "padded",
+          "low_n": 200000000,
+          "high_n": 400000000,
+          "instructions_per_extra_iteration": 11.00000083,
+          "branches_per_extra_iteration": 1.0000008,
+          "cycles_ratio": 1.9973527907954487
+        }
+      ]
+    },
+    {
+      "check": "cycles_scale_with_doubled_work",
+      "passed": true,
+      "detail": [
+        1.9900341240370099,
+        1.9958570568242655,
+        2.001985722464314,
+        1.9973527907954487
+      ]
+    },
+    {
+      "check": "eight_added_nops_count_as_eight",
+      "passed": true,
+      "detail": [
+        {
+          "n": 100000000,
+          "extra_instructions_per_iteration": 8.00000025
+        },
+        {
+          "n": 200000000,
+          "extra_instructions_per_iteration": 8.00000064
+        },
+        {
+          "n": 400000000,
+          "extra_instructions_per_iteration": 8.0000004625
+        }
+      ]
+    },
+    {
+      "check": "repeatable_instruction_counts",
+      "passed": true,
+      "detail": [
+        {
+          "mode": "count",
+          "n": 100000000,
+          "instructions_cv": 8.328896453809915e-08
+        },
+        {
+          "mode": "count",
+          "n": 200000000,
+          "instructions_cv": 1.4443767196190782e-08
+        },
+        {
+          "mode": "count",
+          "n": 400000000,
+          "instructions_cv": 2.1380125662096754e-08
+        },
+        {
+          "mode": "padded",
+          "n": 100000000,
+          "instructions_cv": 2.3905437461955446e-08
+        },
+        {
+          "mode": "padded",
+          "n": 200000000,
+          "instructions_cv": 1.1018304129071351e-08
+        },
+        {
+          "mode": "padded",
+          "n": 400000000,
+          "instructions_cv": 6.721718336586472e-09
+        }
+      ]
+    },
+    {
+      "check": "controlled_branch_misses",
+      "passed": true,
+      "detail": {
+        "branch_miss_fractions": {
+          "branch-fixed": 3.8910806480851405e-05,
+          "branch-random": 0.23153765069249985
+        },
+        "branches_per_extra_iteration": {
+          "branch-fixed": 2.00000085,
+          "branch-random": 2.0000065
+        }
+      }
+    },
+    {
+      "check": "sleep_is_not_counted_as_busy_execution",
+      "passed": true,
+      "detail": {
+        "sleep_wall_ns": 545581767,
+        "sleep_thread_cpu_ns": 64201,
+        "sleep_cycles_to_long_compute_ratio": 0.0007801860868754583
+      }
+    },
+    {
+      "check": "counter_consistency_across_guest_cores",
+      "passed": true,
+      "detail": [
+        {
+          "cpu": 0,
+          "instructions": 600154921.0,
+          "wall_ns": 46704425
+        },
+        {
+          "cpu": 2,
+          "instructions": 600154943.0,
+          "wall_ns": 46218594
+        },
+        {
+          "cpu": 4,
+          "instructions": 600154931.0,
+          "wall_ns": 46480695
+        },
+        {
+          "cpu": 6,
+          "instructions": 600154962.0,
+          "wall_ns": 46056991
+        }
+      ]
+    },
+    {
+      "check": "other_process_instructions_not_charged_to_target",
+      "passed": true,
+      "detail": [
+        {
+          "condition": "guest-sibling",
+          "instructions": 1200155053.0,
+          "cycles": 407975299.0,
+          "wall_ns": 93634183,
+          "wall_ratio_to_idle": 1.0195891090272748,
+          "thread_cpu_ns": 93496953
+        },
+        {
+          "condition": "guest-other-core",
+          "instructions": 1200155056.0,
+          "cycles": 404440477.0,
+          "wall_ns": 92857180,
+          "wall_ratio_to_idle": 1.0111282695015908,
+          "thread_cpu_ns": 92639922
+        },
+        {
+          "condition": "idle",
+          "instructions": 1200155006.0,
+          "cycles": 405176573.0,
+          "wall_ns": 91835213,
+          "wall_ratio_to_idle": 1.0,
+          "thread_cpu_ns": 91640957
+        }
+      ]
+    },
+    {
+      "check": "optional_cycles_sampling_known_hotspot",
+      "passed": true,
+      "optional": true,
+      "detail": {
+        "record_returncode": 0,
+        "report_returncode": 0,
+        "known_hotspot_percent": 99.96
+      }
+    }
+  ],
+  "reference_medians": [
+    {
+      "mode": "hello",
+      "n": 0,
+      "wall_ns": 27522,
+      "thread_cpu_ns": 30778,
+      "instructions:u": 155079.0,
+      "cycles:u": 253487.0,
+      "branches:u": 33892.0,
+      "branch-misses:u": 2892.0
+    },
+    {
+      "mode": "count",
+      "n": 0,
+      "wall_ns": 120,
+      "thread_cpu_ns": 3667,
+      "instructions:u": 154470.0,
+      "cycles:u": 250029.0,
+      "branches:u": 33818.0,
+      "branch-misses:u": 2869.0
+    },
+    {
+      "mode": "sleep",
+      "n": 500,
+      "wall_ns": 545581767,
+      "thread_cpu_ns": 64201,
+      "instructions:u": 155557.0,
+      "cycles:u": 314073.0,
+      "branches:u": 33992.0,
+      "branch-misses:u": 2917.0
+    },
+    {
+      "mode": "count",
+      "n": 100000000,
+      "wall_ns": 22933848,
+      "thread_cpu_ns": 22741248,
+      "instructions:u": 300154926.0,
+      "cycles:u": 101354362.0,
+      "branches:u": 100033905.0,
+      "branch-misses:u": 2996.0
+    },
+    {
+      "mode": "count",
+      "n": 200000000,
+      "wall_ns": 45587224,
+      "thread_cpu_ns": 45347198,
+      "instructions:u": 600154922.0,
+      "cycles:u": 201698639.0,
+      "branches:u": 200033934.0,
+      "branch-misses:u": 3082.0
+    },
+    {
+      "mode": "count",
+      "n": 400000000,
+      "wall_ns": 91396384,
+      "thread_cpu_ns": 91157044,
+      "instructions:u": 1200155031.0,
+      "cycles:u": 402561652.0,
+      "branches:u": 400034032.0,
+      "branch-misses:u": 3328.0
+    },
+    {
+      "mode": "padded",
+      "n": 100000000,
+      "wall_ns": 45695593,
+      "thread_cpu_ns": 45388617,
+      "instructions:u": 1100154951.0,
+      "cycles:u": 200975719.0,
+      "branches:u": 100033947.0,
+      "branch-misses:u": 3121.0
+    },
+    {
+      "mode": "padded",
+      "n": 200000000,
+      "wall_ns": 91103220,
+      "thread_cpu_ns": 90870912,
+      "instructions:u": 2200155050.0,
+      "cycles:u": 402350520.0,
+      "branches:u": 200034024.0,
+      "branch-misses:u": 3346.0
+    },
+    {
+      "mode": "padded",
+      "n": 400000000,
+      "wall_ns": 181197406,
+      "thread_cpu_ns": 181087995,
+      "instructions:u": 4400155216.0,
+      "cycles:u": 803635934.0,
+      "branches:u": 400034184.0,
+      "branch-misses:u": 3728.0
+    },
+    {
+      "mode": "branch-fixed",
+      "n": 20000000,
+      "wall_ns": 13860876,
+      "thread_cpu_ns": 13684220,
+      "instructions:u": 165243807.0,
+      "cycles:u": 72768597.0,
+      "branches:u": 46325601.0,
+      "branch-misses:u": 3304.0
+    },
+    {
+      "mode": "branch-fixed",
+      "n": 40000000,
+      "wall_ns": 27696003,
+      "thread_cpu_ns": 27537973,
+      "instructions:u": 285243824.0,
+      "cycles:u": 133564708.0,
+      "branches:u": 86325618.0,
+      "branch-misses:u": 3359.0
+    },
+    {
+      "mode": "branch-random",
+      "n": 20000000,
+      "wall_ns": 61002300,
+      "thread_cpu_ns": 60796260,
+      "instructions:u": 175255234.0,
+      "cycles:u": 281112994.0,
+      "branches:u": 46325687.0,
+      "branch-misses:u": 9996847.0
+    },
+    {
+      "mode": "branch-random",
+      "n": 40000000,
+      "wall_ns": 120636554,
+      "thread_cpu_ns": 120379543,
+      "instructions:u": 305266836.0,
+      "cycles:u": 549857243.0,
+      "branches:u": 86325817.0,
+      "branch-misses:u": 19987672.0
+    }
+  ],
+  "claim_scope": "listed guest per-process perf stat events on this configuration; not bare-metal equivalence",
+  "unvalidated": [
+    "LBR",
+    "cache events",
+    "precise call graphs",
+    "absolute bare-metal counter accuracy"
+  ]
+}

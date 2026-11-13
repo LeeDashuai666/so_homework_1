@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-11-13T14:46:40.066436</dc:date>
+    <dc:date>2026-11-13T15:44:42.611178</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -35,7 +35,7 @@ L 397.8 97.0128
 L 397.8 12.744
 L 7.2 12.744
 z
-" clip-path="url(#p378f770c65)" style="fill: #f3f6f9; stroke: #f3f6f9; stroke-linejoin: miter"/>
+" clip-path="url(#pedb9e2697a)" style="fill: #f3f6f9; stroke: #f3f6f9; stroke-linejoin: miter"/>
    </g>
    <g id="patch_3">
     <path d="M 7.2 190.152
@@ -43,7 +43,7 @@ L 397.8 190.152
 L 397.8 106.992
 L 7.2 106.992
 z
-" clip-path="url(#p378f770c65)" style="fill: #f0f7f3; stroke: #f0f7f3; stroke-linejoin: miter"/>
+" clip-path="url(#pedb9e2697a)" style="fill: #f0f7f3; stroke: #f0f7f3; stroke-linejoin: miter"/>
    </g>
    <g id="patch_4">
     <path d="M 18.918 85.3704
@@ -56,7 +56,7 @@ Q 14.2308 44.3448 14.2308 50.9976
 L 14.2308 78.7176
 Q 14.2308 85.3704 18.918 85.3704
 z
-" clip-path="url(#p378f770c65)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#pedb9e2697a)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
    </g>
    <g id="patch_5">
     <path d="M 147.816 85.3704
@@ -69,7 +69,7 @@ Q 143.1288 44.3448 143.1288 50.9976
 L 143.1288 78.7176
 Q 143.1288 85.3704 147.816 85.3704
 z
-" clip-path="url(#p378f770c65)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#pedb9e2697a)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
    </g>
    <g id="patch_6">
     <path d="M 284.526 85.3704
@@ -82,7 +82,7 @@ Q 279.8388 44.3448 279.8388 50.9976
 L 279.8388 78.7176
 Q 279.8388 85.3704 284.526 85.3704
 z
-" clip-path="url(#p378f770c65)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#pedb9e2697a)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
    </g>
    <g id="patch_7">
     <path d="M 18.918 174.6288
@@ -95,7 +95,7 @@ Q 14.2308 133.6032 14.2308 140.256
 L 14.2308 167.976
 Q 14.2308 174.6288 18.918 174.6288
 z
-" clip-path="url(#p378f770c65)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#pedb9e2697a)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
    </g>
    <g id="patch_8">
     <path d="M 147.816 174.6288
@@ -108,7 +108,7 @@ Q 143.1288 133.6032 143.1288 140.256
 L 143.1288 167.976
 Q 143.1288 174.6288 147.816 174.6288
 z
-" clip-path="url(#p378f770c65)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#pedb9e2697a)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
    </g>
    <g id="patch_9">
     <path d="M 284.526 174.6288
@@ -121,7 +121,7 @@ Q 279.8388 133.6032 279.8388 140.256
 L 279.8388 167.976
 Q 279.8388 174.6288 284.526 174.6288
 z
-" clip-path="url(#p378f770c65)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
+" clip-path="url(#pedb9e2697a)" style="fill: #eaf2fa; stroke: #647b90; stroke-width: 1.2; stroke-linejoin: miter"/>
    </g>
    <g id="text_1">
     <!-- 离线：BOLT生成程序 -->
@@ -3108,7 +3108,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="p378f770c65">
+  <clipPath id="pedb9e2697a">
    <rect x="7.2" y="7.2" width="390.6" height="185.724"/>
   </clipPath>
  </defs>

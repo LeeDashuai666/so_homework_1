@@ -1,0 +1,34 @@
+{
+  "off": {
+    "total_samples": 934,
+    "mapped_symbols": {
+      "other_or_unresolved": 9,
+      "main": 1,
+      "cmov_kernel_v1": 924
+    },
+    "method": "PERF_RECORD_MMAP2 IP-to-file-offset, then ELF PT_LOAD file-offset-to-VA, then bounded nm -S text symbol ranges. Ignores perf printed symbol labels.",
+    "percent": {
+      "other_or_unresolved": 0.9635974304068522,
+      "main": 0.10706638115631692,
+      "cmov_kernel_v1": 98.92933618843684
+    }
+  },
+  "on": {
+    "total_samples": 794,
+    "mapped_symbols": {
+      "other_or_unresolved": 10,
+      "main": 1,
+      "__bolt_cmov_branch_v1": 322,
+      "cmov_kernel_v1": 460,
+      "main_elf_unresolved": 1
+    },
+    "method": "PERF_RECORD_MMAP2 IP-to-file-offset, then ELF PT_LOAD file-offset-to-VA, then bounded nm -S text symbol ranges. Ignores perf printed symbol labels.",
+    "percent": {
+      "other_or_unresolved": 1.2594458438287153,
+      "main": 0.12594458438287154,
+      "__bolt_cmov_branch_v1": 40.55415617128463,
+      "cmov_kernel_v1": 57.9345088161209,
+      "main_elf_unresolved": 0.12594458438287154
+    }
+  }
+}

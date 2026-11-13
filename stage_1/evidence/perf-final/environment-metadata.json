@@ -1,0 +1,70 @@
+{
+  "started_at_utc": "2026-11-13T07:22:12Z",
+  "kernel": "6.6.87.2-microsoft-standard-WSL2",
+  "machine": "x86_64",
+  "guest_topology": [
+    {
+      "cpu": 0,
+      "core_id": "0",
+      "physical_package_id": "0",
+      "thread_siblings_list": "0-1"
+    },
+    {
+      "cpu": 1,
+      "core_id": "0",
+      "physical_package_id": "0",
+      "thread_siblings_list": "0-1"
+    },
+    {
+      "cpu": 2,
+      "core_id": "1",
+      "physical_package_id": "0",
+      "thread_siblings_list": "2-3"
+    },
+    {
+      "cpu": 3,
+      "core_id": "1",
+      "physical_package_id": "0",
+      "thread_siblings_list": "2-3"
+    },
+    {
+      "cpu": 4,
+      "core_id": "2",
+      "physical_package_id": "0",
+      "thread_siblings_list": "4-5"
+    },
+    {
+      "cpu": 5,
+      "core_id": "2",
+      "physical_package_id": "0",
+      "thread_siblings_list": "4-5"
+    },
+    {
+      "cpu": 6,
+      "core_id": "3",
+      "physical_package_id": "0",
+      "thread_siblings_list": "6-7"
+    },
+    {
+      "cpu": 7,
+      "core_id": "3",
+      "physical_package_id": "0",
+      "thread_siblings_list": "6-7"
+    }
+  ],
+  "selected_guest_cpu": 2,
+  "guest_sibling": 3,
+  "guest_other_core": 0,
+  "guest_affinity_is_not_host_physical_isolation": true,
+  "repeats": 7,
+  "perf_path": "/home/lxy18/system_homework/stage_1/.tools/root/usr/lib/linux-tools-6.8.0-147/perf",
+  "thresholds_defined_in": "/home/lxy18/system_homework/stage_1/experiments/wsl-perf-check/README.md",
+  "windows_cpu": {
+    "Name": "AMD Ryzen 7 7735H with Radeon Graphics        ",
+    "NumberOfCores": 8,
+    "NumberOfLogicalProcessors": 16,
+    "ThreadCount": 16
+  },
+  "probe_sha256": "c01922a2f11cb01ea5954fa0fa26541bba40a34d5e293e92aa76b00e06cb37cb",
+  "completed_at_utc": "2026-11-13T07:22:28Z"
+}

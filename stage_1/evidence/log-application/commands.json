@@ -1,0 +1,157 @@
+[
+  {
+    "argv": [
+      "/home/lxy18/system_homework/stage_1/.tools/root/usr/lib/llvm-18/bin/clang++",
+      "-O3",
+      "-g",
+      "-std=c++17",
+      "-I",
+      "/home/lxy18/system_homework/stage_1/project/cmov_runtime",
+      "-c",
+      "/home/lxy18/system_homework/stage_1/project/cmov_runtime/kernel.cpp",
+      "-o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/kernel.o"
+    ],
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/home/lxy18/system_homework/stage_1/.tools/root/usr/lib/llvm-18/bin/clang++",
+      "-O3",
+      "-g",
+      "-std=c++17",
+      "-I",
+      "/home/lxy18/system_homework/stage_1/project/cmov_runtime",
+      "-c",
+      "/home/lxy18/system_homework/stage_1/project/cmov_runtime/plain.cpp",
+      "-o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/plain.o"
+    ],
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/home/lxy18/system_homework/stage_1/.tools/root/usr/lib/llvm-18/bin/clang++",
+      "-O3",
+      "-g",
+      "-std=c++17",
+      "-I",
+      "/home/lxy18/system_homework/stage_1/project/cmov_runtime",
+      "-c",
+      "/home/lxy18/system_homework/stage_1/project/cmov_runtime/entry.cpp",
+      "-o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/entry.o"
+    ],
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/home/lxy18/system_homework/stage_1/.tools/root/usr/lib/llvm-18/bin/clang++",
+      "-O3",
+      "-g",
+      "-std=c++17",
+      "-I",
+      "/home/lxy18/system_homework/stage_1/project/cmov_runtime",
+      "-c",
+      "/home/lxy18/system_homework/stage_1/experiments/log-time-index/app.cpp",
+      "-o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/app.o"
+    ],
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/home/lxy18/system_homework/stage_1/.tools/root/usr/lib/llvm-18/bin/clang++",
+      "-Wl,--emit-relocs",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/kernel.o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/plain.o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/entry.o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/app.o",
+      "-o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/input"
+    ],
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/home/lxy18/system_homework/stage_1/build/bin/llvm-bolt",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/input",
+      "-instrument",
+      "-instrumentation-file=/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/normal.fdata",
+      "-o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/normal.inst"
+    ],
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/home/lxy18/system_homework/stage_1/build/bin/llvm-bolt",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/input",
+      "-instrument",
+      "-instrumentation-file=/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/probe.fdata",
+      "-cmov-branchify-probe",
+      "-cmov-branchify-sites=/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/sites.json",
+      "-o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/probe.inst"
+    ],
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/home/lxy18/system_homework/stage_1/build/bin/llvm-bolt",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/input",
+      "-data=/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/normal.fdata",
+      "-reorder-blocks=ext-tsp",
+      "-reorder-functions=cdsort",
+      "-frame-opt=all",
+      "-reg-reassign",
+      "-peepholes=all",
+      "-inline-small-functions",
+      "-cmov-conversion",
+      "-verify-cfg",
+      "-o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/off"
+    ],
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/home/lxy18/system_homework/stage_1/build/bin/llvm-bolt",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/input",
+      "-data=/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/normal.fdata",
+      "-reorder-blocks=ext-tsp",
+      "-reorder-functions=cdsort",
+      "-frame-opt=all",
+      "-reg-reassign",
+      "-peepholes=all",
+      "-inline-small-functions",
+      "-cmov-conversion",
+      "-verify-cfg",
+      "-cmov-branchify-candidate",
+      "-cmov-branchify-profile=/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/candidate-profile.json",
+      "-o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/candidate"
+    ],
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/home/lxy18/system_homework/stage_1/build/bin/llvm-bolt",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/input",
+      "-data=/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/normal.fdata",
+      "-reorder-blocks=ext-tsp",
+      "-reorder-functions=cdsort",
+      "-frame-opt=all",
+      "-reg-reassign",
+      "-peepholes=all",
+      "-inline-small-functions",
+      "-cmov-conversion",
+      "-verify-cfg",
+      "-cmov-branchify-runtime",
+      "-cmov-branchify-profile=/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/profile.json",
+      "-o",
+      "/home/lxy18/system_homework/stage_1/results/log-time-count-20261113/on"
+    ],
+    "returncode": 0
+  }
+]
