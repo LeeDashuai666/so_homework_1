@@ -44,7 +44,12 @@ cd so_homework_1
 
 ## 提交内容
 
-- [代码patch](stage_1/patches/cmov-runtime.patch)
-- 简洁设计文档：[Word](stage_1/docs/design.docx) · [PDF](stage_1/docs/design.pdf) · [在线阅读](stage_1/docs/design.md)
-- [实验数据](stage_1/evidence/final/) · [长计时补测](stage_1/evidence/precision/) · [结果CSV](stage_1/docs/results.csv)
-- [Docker及源码包](https://github.com/LeeDashuai666/so_homework_1/releases/tag/runtime-v3-20261113)
+| 作业交付项 | 下载或查看 | 内容 |
+|---|---|---|
+| 代码patch | [cmov-runtime.patch](stage_1/patches/cmov-runtime.patch) | 对固定LLVM/BOLT基线的完整修改 |
+| Docker镜像 | [下载镜像归档](https://github.com/LeeDashuai666/so_homework_1/releases/download/runtime-v3-20261113/so_homework_1-runtime-v3-linux_amd64.docker.tar.gz) | llvm-bolt可执行文件、运行库、测试负载、测试脚本及编译工具 |
+| 设计文档 | [设计文档PDF](stage_1/docs/design.pdf) | 问题描述、优化设计、实现细节、实验验证、局限性 |
+
+提交文档以上述PDF为准。Docker归档约279 MiB，`./run.sh`会自动下载、校验和加载；镜像信息与SHA256见[image.json](stage_1/image.json)。
+
+[实验数据](stage_1/evidence/final/) · [长计时补测](stage_1/evidence/precision/) · [结果CSV](stage_1/docs/results.csv) · [Release下载页](https://github.com/LeeDashuai666/so_homework_1/releases/tag/runtime-v3-20261113)
